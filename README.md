@@ -243,16 +243,13 @@ python -m http.server 8765
 ### Publikacja
 
 `.github/workflows/pages.yml` publikuje katalog `docs/` na GitHub Pages przy
-każdym pushu na `main`.
+każdym pushu na `main`. Krok `configure-pages` ma ustawione `enablement: true`,
+więc przy pierwszym uruchomieniu sam włącza Pages przez API i ustawia źródło
+na GitHub Actions — nie trzeba niczego klikać w ustawieniach repozytorium.
 
-Jednorazowa konfiguracja w repozytorium: **Settings → Pages → Build and
-deployment → Source: GitHub Actions**. Po jej włączeniu wystarczy uruchomić
-workflow *Publikacja portalu* (zakładka **Actions → Run workflow**) albo
-wypchnąć cokolwiek do `docs/` — strona pojawi się pod
-`https://aliksix.github.io/basket_lab/`.
-
-Wszystkie ścieżki w portalu są względne, więc działa on zarówno w katalogu
-głównym domeny, jak i w podkatalogu `/basket_lab/`.
+Workflow można też odpalić ręcznie: **Actions → Publikacja portalu → Run
+workflow**. Wszystkie ścieżki w portalu są względne, więc działa on zarówno
+w katalogu głównym domeny, jak i w podkatalogu `/basket_lab/`.
 
 `.github/workflows/refresh.yml` dociąga nowe mecze po kolejce (poniedziałek
 i wtorek rano) i commituje przeliczone dane.
