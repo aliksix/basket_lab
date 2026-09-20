@@ -3,6 +3,8 @@
 Ekstraktor statystyk koszykarskich + statyczny portal analityczny dla
 KKS Basket Poznań (Enea Basket Poznań) w PZKosz 1 Lidze Mężczyzn.
 
+**Portal na żywo: https://aliksix.github.io/basket_lab/**
+
 Projekt ma dwie części:
 
 | Katalog | Co robi |
@@ -125,6 +127,15 @@ python -m basketlab add 2905346 --pzkosz-id 223891 --date 2026-09-19 --round 1
 * **xPTS lite** — oczekiwane punkty na rzut przy ligowej skuteczności w danych
   strefach; różnica względem rzeczywistego PPS to *shot making*.
 * **Kill shots** — serie co najmniej 10 punktów bez odpowiedzi rywala.
+* **Clutch time** — ostatnie 5 minut IV kwarty i cała dogrywka przy różnicy
+  punktowej do 5. Przynależność sprawdzana jest **na początku każdego
+  posiadania**, więc mecz wchodzi i wychodzi z clutch time w trakcie końcówki.
+  Liczone osobno dla zawodników (box score + on/off) i dla piątek.
+* **Akcje „+15"** — posiadania, w których pierwsza szansa trwała co najmniej
+  15 sekund, czyli gra przeciwko ustawionej obronie. Rzuty i punkty po własnej
+  zbiórce w ataku są pomijane, bo sztucznie wydłużałyby akcję. Stąd dwa
+  wskaźniki: **%FGA +15** (odsetek rzutów z długich akcji) i **PPP +15**
+  (punkty na jedno długie posiadanie).
 
 ### Struktura pakietu
 
@@ -232,8 +243,16 @@ python -m http.server 8765
 ### Publikacja
 
 `.github/workflows/pages.yml` publikuje katalog `docs/` na GitHub Pages przy
-każdym pushu na `main`. W ustawieniach repozytorium wybierz
-**Settings → Pages → Source: GitHub Actions**.
+każdym pushu na `main`.
+
+Jednorazowa konfiguracja w repozytorium: **Settings → Pages → Build and
+deployment → Source: GitHub Actions**. Po jej włączeniu wystarczy uruchomić
+workflow *Publikacja portalu* (zakładka **Actions → Run workflow**) albo
+wypchnąć cokolwiek do `docs/` — strona pojawi się pod
+`https://aliksix.github.io/basket_lab/`.
+
+Wszystkie ścieżki w portalu są względne, więc działa on zarówno w katalogu
+głównym domeny, jak i w podkatalogu `/basket_lab/`.
 
 `.github/workflows/refresh.yml` dociąga nowe mecze po kolejce (poniedziałek
 i wtorek rano) i commituje przeliczone dane.
