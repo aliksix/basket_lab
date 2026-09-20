@@ -169,7 +169,7 @@ błękit `#3A5BD9`). Motyw jasny i ciemny przełącznikiem w prawym górnym rogu
 | Strona | Zawartość |
 | --- | --- |
 | `index.html` | panel drużyny: OFF/DEF/NET RTG, tempo, ratingi skorygowane, Four Factors, profil rzutowy, forma mecz po meczu, tabela ligi, mapa stylu |
-| `players.html` | kafle zawodników w układzie Dunks & Threes: Impact z miejscem w lidze, rozbicie OFF/DEF, dwa PPP, paski percentyli sześciu umiejętności |
+| `players.html` | kafle zawodników w układzie Dunks & Threes: Impact z miejscem w lidze, linie OFF/DEF, dwa PPP, wykres pizza sześciu umiejętności |
 | `player.html?p=…` | profil: rozbicie wpływu, percentyle, on/off, Shooting Lab (mapa rzutów + strefy + xPTS), mecz po meczu |
 | `games.html?m=…` | pełne play-by-play meczu, filtr po zawodniku i kwarcie, posiadania |
 | `lineups.html` | piątki z miniaturami zdjęć, tabela piątek, tabela duetów z synergią |
@@ -201,17 +201,22 @@ Układ przeniesiony z Dunks & Threes:
 
 ```
 IMPACT  0.0   #42 z 82
-OFF +0.1 #27        DEF −0.1 #53
+OFF  ──────●────   +0.1  #27
+DEF  ────●──────   −0.1  #53
 19.0 PKT · 1.20 PPP · 1.31 PPP ON
-PTS 88  TS% 65  AST 73  TOV 62  STL 69  BLK 42
+        ◔ wykres pizza: PTS 88 · TS% 65 · AST 73
+          TOV 62 · STL 69 · BLK 42
 ```
 
-Ocena główna z **miejscem w lidze** (nie percentylem), pod nią rozbicie na atak
-i obronę, a na dole poziome paski percentyli tych samych sześciu kategorii,
-których używa D&T. Wartość paska to zawsze percentyl w lidze, więc kategorie są
-porównywalne między sobą i między zawodnikami; surowa liczba i miejsce trafiają
-do dymka. TOV jest odwrócone przy liczeniu percentyla, więc wysoki pasek zawsze
-znaczy „dobrze".
+Ocena główna z **miejscem w lidze** (nie percentylem). Pod nią OFF i DEF jako
+**linie** — tor od najgorszego do najlepszego w lidze ze znacznikiem w miejscu
+zawodnika. Na dole **wykres pizza**: sześć kawałków o równym kącie, gdzie
+zmienną jest promień, czyli percentyl w lidze. Kategorie i ich kolejność są te
+same co na D&T (PTS, TS%, AST, TOV, STL, BLK).
+
+TOV jest odwrócone przy liczeniu percentyla, więc długi kawałek zawsze znaczy
+„dobrze" — inaczej gracz z najniższą stratowalnością wyglądałby najgorzej.
+Surowa wartość i miejsce w lidze trafiają do dymka.
 
 Dwa różne PPP, celowo pokazywane obok siebie:
 

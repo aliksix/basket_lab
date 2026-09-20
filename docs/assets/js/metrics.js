@@ -216,9 +216,9 @@ export function playerSkills(player, scope = 'percentiles') {
   });
   return [
     make('scoring_100', 'PTS', 'Punkty', 'Punkty na 100 posiadań', fmt(f.scoring_100)),
-    make('ts', 'TS%', 'Skuteczność', 'True Shooting %', fmt(m.ts, 1, '%')),
+    make('ts', 'TS%', 'Rzuty', 'True Shooting %', fmt(m.ts, 1, '%')),
     make('ast_rate', 'AST', 'Kreowanie', 'Assist Rate (AST%)', fmt(m.ast_rate, 1, '%')),
-    make('tov_rate', 'TOV', 'Ochrona piłki', 'Turnover Rate (TOV%)', fmt(m.tov_rate, 1, '%')),
+    make('tov_rate', 'TOV', 'Ochrona', 'Turnover Rate (TOV%)', fmt(m.tov_rate, 1, '%')),
     make('stl_rate', 'STL', 'Przechwyty', 'Steal Rate (STL%)', fmt(m.stl_rate, 2, '%')),
     make('blk_rate', 'BLK', 'Bloki', 'Block Rate (BLK%)', fmt(m.blk_rate, 2, '%')),
   ];

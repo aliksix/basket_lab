@@ -87,34 +87,99 @@ export function rollingMean(values, window) {
 }
 
 
-/* --- paski umiejetnosci ---------------------------------------------------- */
+/* --- wykres pizza (umiejetnosci) ------------------------------------------- */
 /**
- * Poziome paski percentyli - uklad jak na Dunks & Threes.
- * Wartoscia jest zawsze percentyl w lidze (0-100), wiec paski sa porownywalne
- * miedzy soba i miedzy zawodnikami; surowa liczba trafia do dymka.
+ * Wycinki kola o promieniu proporcjonalnym do percentyla - uklad z Dunks
+ * & Threes. Kazdy kawalek ma ten sam kat, wiec dlugosc promienia jest jedyna
+ * zmienna: im dalej siega, tym lepszy wynik na tle ligi.
  */
-export function skillBars(skills, { compact = false } = {}) {
-  const wrap = el('div', { class: 'skills' + (compact ? ' skills--compact' : '') });
-  for (const skill of skills) {
-    const bar = el('div', { class: 'pbar' });
-    const fill = el('i');
-    fill.style.width = Math.max(2, skill.value ?? 0) + '%';
-    fill.style.background = percentileColor(skill.value);
-    bar.append(fill);
+export function pizza(skills, { size = 260, compact = false } = {}) {
+  const usable = skills.filter((s) => s.value !== null && s.value !== undefined);
+  if (usable.length < 3) return el('div', { class: 'empty' }, 'Za mało danych');
 
+  const caption = (s) => String((compact ? s.short : s.axis) ?? s.label ?? '');
+  const charWidth = compact ? 5.2 : 5.6;
+  const longest = Math.max(...skills.map((s) => caption(s).length));
+  const pad = Math.min(size * 0.3, 10 + longest * charWidth + (compact ? 8 : 11));
+  const cx = size / 2;
+  const cy = size / 2;
+  const R = size / 2 - pad;
+  const n = skills.length;
+  const step = 360 / n;
+  const gap = 2;
+
+  const svg = svgEl('svg', { viewBox: `0 0 ${size} ${size}`, class: 'pizza' });
+  const at = (r, deg) => {
+    const rad = ((deg - 90) * Math.PI) / 180;
+    return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)];
+  };
+  const wedge = (r, a0, a1) => {
+    const [x0, y0] = at(r, a0);
+    const [x1, y1] = at(r, a1);
+    return `M ${cx} ${cy} L ${x0} ${y0} A ${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1} ${y1} Z`;
+  };
+
+  skills.forEach((skill, i) => {
+    const a0 = i * step + gap / 2;
+    const a1 = (i + 1) * step - gap / 2;
+    svg.append(svgEl('path', { class: 'pizza__bg', d: wedge(R, a0, a1) }));
+
+    const value = skill.value ?? 0;
+    const slice = svgEl('path', {
+      class: 'pizza__slice',
+      d: wedge(Math.max(R * (value / 100), 1.5), a0, a1),
+      fill: percentileColor(skill.value),
+    });
     const place = skill.rank ? ` · ${skill.rank}. miejsce` : '';
-    wrap.append(el('div', {
-      class: 'skills__row',
-      'data-tip': `<b>${skill.label}</b>${skill.display ?? '–'}`
-        + `<em>${skill.value === null || skill.value === undefined
-          ? 'brak danych'
-          : Math.round(skill.value) + '. percentyl w lidze' + place}</em>`,
-    },
-      el('span', {}, compact ? skill.short : skill.axis),
-      bar,
-      el('b', {}, skill.value === null || skill.value === undefined ? '–' : Math.round(skill.value))));
+    slice.dataset.tip = `<b>${skill.label}</b>${skill.display ?? '–'}`
+      + `<em>${skill.value === null || skill.value === undefined
+        ? 'brak danych'
+        : Math.round(skill.value) + '. percentyl w lidze' + place}</em>`;
+    svg.append(slice);
+  });
+
+  for (const level of [25, 50, 75]) {
+    svg.append(svgEl('circle', { class: 'pizza__grid', cx, cy, r: R * (level / 100) }));
   }
-  return wrap;
+  svg.append(svgEl('circle', { class: 'pizza__edge', cx, cy, r: R }));
+
+  skills.forEach((skill, i) => {
+    const mid = i * step + step / 2;
+    const [lx, ly] = at(R + (compact ? 9 : 12), mid);
+    const dx = Math.cos(((mid - 90) * Math.PI) / 180);
+    const anchor = dx > 0.25 ? 'start' : dx < -0.25 ? 'end' : 'middle';
+    const group = svgEl('g', { class: 'pizza__tag' });
+    const name = svgEl('text', { class: 'pizza__label', x: lx, y: ly, 'text-anchor': anchor });
+    name.textContent = caption(skill);
+    const value = svgEl('text', {
+      class: 'pizza__value', x: lx, y: ly + (compact ? 9 : 11), 'text-anchor': anchor,
+    });
+    value.textContent = skill.value === null || skill.value === undefined ? '–' : Math.round(skill.value);
+    group.append(name, value);
+    svg.append(group);
+  });
+  return svg;
+}
+
+/**
+ * Linia oceny: tor od najgorszego do najlepszego w lidze ze znacznikiem
+ * w miejscu zawodnika. Tak Dunks & Threes pokazuje OFF i DEF.
+ */
+export function ratingLine({ label, value, percentile, rank, total, format = (v) => num(v, 1) }) {
+  const track = el('div', { class: 'rline__track' });
+  const fill = el('i');
+  fill.style.width = Math.max(2, percentile ?? 0) + '%';
+  fill.style.background = percentileColor(percentile);
+  const dot = el('u');
+  dot.style.left = Math.max(2, Math.min(percentile ?? 0, 98)) + '%';
+  dot.style.background = percentileColor(percentile);
+  track.append(fill, dot);
+
+  return el('div', { class: 'rline' },
+    el('span', { class: 'rline__label' }, label),
+    track,
+    el('b', { class: 'rline__value' }, format(value)),
+    el('span', { class: 'rline__rank' }, rank ? '#' + rank : '–'));
 }
 
 /** Kolor punktu wedlug bilansu na 100 posiadan (+/- 15 to skrajnosci skali). */

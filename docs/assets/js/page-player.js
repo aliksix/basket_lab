@@ -8,7 +8,7 @@ import {
   FILTERS, ZONES14, addStats, clutchRatings, efg, emptyStats, expectedPps, fgaLongRate,
   playerSkills, pppLong, pppOnCourt, sumBuckets, ts, zoneProfile, zonesFromShots,
 } from './metrics.js';
-import { divergingBars, formLine, shotDiet, skillBars } from './charts.js';
+import { divergingBars, formLine, pizza, ratingLine, shotDiet } from './charts.js';
 import { shotChart, shotLegend, shotModeSwitch } from './court.js';
 
 restoreTheme();
@@ -285,12 +285,21 @@ function impactSection() {
     const rank = player.ranks?.[key];
     return rank ? `#${rank}${player.ranked_of ? ' z ' + player.ranked_of : ''}` : null;
   };
+  const lines = el('div', { class: 'card' },
+    el('div', { class: 'card__head' }, el('h2', {}, 'Na tle ligi'),
+      el('span', { class: 'card__sub' }, `pozycja wśród ${player.ranked_of || '–'} zawodników`)),
+    ratingLine({ label: 'IMPACT', value: impact.total, percentile: pc?.total, rank: player.ranks?.total, format: (v) => signed(v, 1) }),
+    ratingLine({ label: 'OFF', value: impact.off, percentile: pc?.off, rank: player.ranks?.off, format: (v) => signed(v, 1) }),
+    ratingLine({ label: 'DEF', value: impact.def, percentile: pc?.def, rank: player.ranks?.def, format: (v) => signed(v, 1) }));
+
   return section('Wpływ na grę', 'BasketLab Impact = skorygowane on/off + model box-score dopasowany do 1 LM',
     el('div', { class: 'grid grid--impact' },
       statTile({ metric: 'impact', value: signed(impact.total, 1), percentile: pc?.total, hint: place('total') }),
       statTile({ metric: 'impact_off', value: signed(impact.off, 1), percentile: pc?.off, hint: place('off') }),
       statTile({ metric: 'impact_def', value: signed(impact.def, 1), percentile: pc?.def, hint: place('def') }),
-      parts));
+      lines),
+    el('div', { style: 'height:14px' }),
+    parts);
 }
 
 /* --- produkcja ------------------------------------------------------------- */
@@ -343,7 +352,7 @@ function percentilesSection() {
   const profile = el('div', { class: 'card' },
     el('div', { class: 'card__head' }, el('h2', {}, 'Profil umiejętności'),
       el('span', { class: 'card__sub' }, 'percentyl w lidze')),
-    skillBars(playerSkills(player, scope)),
+    pizza(playerSkills(player, scope), { size: 320 }),
     el('div', { class: 'grid grid--3', style: 'margin-top:12px' },
       statTile({ metric: 'ppp_ind', value: num(player.metrics?.ppp_ind, 2) }),
       statTile({ metric: 'ppp_on', value: num(pppOnCourt(player), 2) }),

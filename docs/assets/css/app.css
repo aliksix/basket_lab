@@ -269,8 +269,7 @@ table.data .is-club td:first-child { color: var(--brand); }
 .ptile__impact b { font-size: 1.4rem; font-variant-numeric: tabular-nums; letter-spacing: -.025em; }
 /* blok ocen w ukladzie Dunks & Threes: duza wartosc + miejsce w lidze */
 .ptile__epm { padding: 2px 16px 0; }
-.ptile__epm small,
-.ptile__split-cell small {
+.ptile__epm small {
   display: block; font-size: .6rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--ink-muted); font-weight: 700;
 }
@@ -280,31 +279,32 @@ table.data .is-club td:first-child { color: var(--brand); }
   font-variant-numeric: tabular-nums; line-height: 1.1;
 }
 .ptile__epm-row span { font-size: .72rem; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
-.ptile__split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px 16px 10px; }
-.ptile__split-cell {
-  background: var(--surface-3); border-radius: 9px; padding: 6px 9px;
-  display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;
-}
-.ptile__split-cell small { flex: 1 1 100%; }
-.ptile__split-cell b { font-size: 1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.ptile__split-cell span { font-size: .68rem; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
-.ptile__skills { padding: 10px 16px 14px; border-top: 1px solid var(--border-soft); background: var(--surface-2); }
+.ptile__lines { padding: 8px 16px 4px; display: grid; gap: 6px; }
+.ptile__skills { padding: 6px 8px 10px; border-top: 1px solid var(--border-soft); background: var(--surface-2); }
 
-/* poziome paski percentyli */
-.skills { display: grid; gap: 4px; }
-.skills__row {
-  display: grid; grid-template-columns: 46px 1fr 26px; gap: 9px;
-  align-items: center; font-size: .75rem;
+/* linia oceny na tle ligi: tor, wypelnienie do percentyla, znacznik */
+.rline { display: grid; grid-template-columns: 34px 1fr 42px 30px; gap: 8px; align-items: center; font-size: .74rem; }
+.rline__label { color: var(--ink-muted); font-weight: 700; letter-spacing: .05em; }
+.rline__track { position: relative; height: 6px; border-radius: 99px; background: var(--surface-3); }
+.rline__track i { position: absolute; inset: 0 auto 0 0; border-radius: 99px; display: block; }
+.rline__track u {
+  position: absolute; top: 50%; width: 9px; height: 9px; border-radius: 50%;
+  transform: translate(-50%, -50%); border: 2px solid var(--surface); display: block;
 }
-.skills--compact .skills__row { grid-template-columns: 34px 1fr 24px; font-size: .71rem; }
-.skills__row > span { color: var(--ink-muted); font-weight: 700; letter-spacing: .03em; }
-.skills__row > b { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
-.ptile__line { display: flex; gap: 13px; padding: 0 16px 12px; font-size: .77rem; color: var(--ink-muted); }
-.ptile__line b { color: var(--ink); font-weight: 620; font-variant-numeric: tabular-nums; }
-.ptile__bars { padding: 10px 16px 14px; border-top: 1px solid var(--border-soft); background: var(--surface-2); }
-.ptile__row { display: grid; grid-template-columns: 58px 1fr 34px; gap: 8px; align-items: center; font-size: .73rem; padding: 3px 0; }
-.ptile__row span:first-child { color: var(--ink-muted); }
-.ptile__row span:last-child { text-align: right; font-variant-numeric: tabular-nums; font-weight: 650; }
+.rline__value { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
+.rline__rank { text-align: right; font-size: .68rem; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+.card .rline { padding: 5px 0; font-size: .8rem; }
+
+/* wykres pizza: kawalki o promieniu wedlug percentyla */
+.pizza { width: 100%; height: auto; display: block; max-width: 300px; margin-inline: auto; }
+.pizza__bg { fill: var(--surface-3); }
+.pizza__slice { stroke: var(--surface); stroke-width: 1; }
+.pizza__slice:hover { stroke: var(--ink); stroke-width: 1.6; }
+.pizza__grid { fill: none; stroke: var(--surface); stroke-width: 1; stroke-opacity: .7; }
+.pizza__edge { fill: none; stroke: var(--border); stroke-width: 1; }
+.pizza__tag { pointer-events: none; }
+.pizza__label { fill: var(--ink-muted); font-size: 9.5px; font-weight: 700; letter-spacing: .04em; }
+.pizza__value { fill: var(--ink); font-size: 10px; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* --- podpowiedzi ----------------------------------------------------------- */
 .q {

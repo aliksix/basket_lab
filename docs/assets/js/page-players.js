@@ -5,7 +5,7 @@ import {
   num, percentileColor, restoreTheme, signed,
 } from './core.js';
 import { playerSkills, pppOnCourt } from './metrics.js';
-import { skillBars } from './charts.js';
+import { pizza, ratingLine } from './charts.js';
 
 restoreTheme();
 
@@ -97,16 +97,24 @@ function tile(player) {
         tinted(el('b', {}, signed(player.impact?.total, 1)), player.percentiles?.total),
         el('span', {}, placeLabel(player, 'total')))),
 
-    el('div', { class: 'ptile__split' },
-      splitCell('impact_off', 'OFF', player, 'off'),
-      splitCell('impact_def', 'DEF', player, 'def')),
+    el('div', { class: 'ptile__lines' },
+      ratingLine({
+        label: 'OFF', value: player.impact?.off,
+        percentile: player.percentiles?.off, rank: player.ranks?.off,
+        format: (v) => signed(v, 1),
+      }),
+      ratingLine({
+        label: 'DEF', value: player.impact?.def,
+        percentile: player.percentiles?.def, rank: player.ranks?.def,
+        format: (v) => signed(v, 1),
+      })),
 
     el('div', { class: 'ptile__line' },
       el('span', {}, el('b', {}, num(player.metrics?.per_game?.pts, 1)), ' PKT'),
       el('span', { 'data-metric': 'ppp_ind' }, el('b', {}, num(player.metrics?.ppp_ind, 2)), ' PPP'),
       el('span', { 'data-metric': 'ppp_on' }, el('b', {}, num(pppOnCourt(player), 2)), ' PPP ON')),
 
-    el('div', { class: 'ptile__skills' }, skillBars(playerSkills(player), { compact: true })));
+    el('div', { class: 'ptile__skills' }, pizza(playerSkills(player), { size: 210, compact: true })));
 }
 
 /** Miejsce w lidze w formacie "#12 z 82". */
@@ -119,13 +127,6 @@ function placeLabel(player, key) {
 function tinted(node, percentile) {
   node.style.color = percentileColor(percentile);
   return node;
-}
-
-function splitCell(metric, label, player, key) {
-  return el('div', { class: 'ptile__split-cell', 'data-metric': metric },
-    el('small', {}, label),
-    tinted(el('b', {}, signed(player.impact?.[key], 1)), player.percentiles?.[key]),
-    el('span', {}, player.ranks?.[key] ? '#' + player.ranks[key] : '–'));
 }
 
 function table(list) {
