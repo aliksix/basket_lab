@@ -201,23 +201,26 @@ const fmt = (v, digits = 1, suffix = '') =>
   (v === null || v === undefined ? '–' : Number(v).toFixed(digits) + suffix);
 
 /**
- * Osie wykresu radarowego zawodnika. Wartoscia jest zawsze percentyl w lidze,
- * zeby wszystkie osie byly porownywalne; surowa liczba trafia do dymka.
+ * Zestaw umiejetnosci pokazywany na kaflu i w profilu - te same szesc kategorii
+ * co na Dunks & Threes (PTS, TS%, AST, TOV, STL, BLK), liczone jako percentyl
+ * w lidze. TOV jest odwrocone przy liczeniu percentyla, wiec wysoki slupek
+ * zawsze znaczy "dobrze".
  */
-export function skillAxes(player, scope = 'percentiles') {
+export function playerSkills(player, scope = 'percentiles') {
   const pc = player[scope] || player.percentiles || {};
+  const rank = player.ranks || {};
   const m = player.metrics || {};
   const f = player.features || {};
-  const impact = player.impact || {};
-  // short - kafel, axis - duzy wykres, label - dymek
+  const make = (key, short, axis, label, display) => ({
+    key, short, axis, label, display, value: pc[key] ?? null, rank: rank[key] ?? null,
+  });
   return [
-    { key: 'scoring_100', short: 'PKT', axis: 'Punkty', label: 'Punkty na 100 posiadań', value: pc.scoring_100 ?? null, display: fmt(f.scoring_100) },
-    { key: 'ts', short: 'RZU', axis: 'Rzuty', label: 'Skuteczność rzutowa (TS%)', value: pc.ts ?? null, display: fmt(m.ts, 1, '%') },
-    { key: 'ast_rate', short: 'KRE', axis: 'Kreowanie', label: 'Kreowanie gry (AST%)', value: pc.ast_rate ?? null, display: fmt(m.ast_rate, 1, '%') },
-    { key: 'tov_rate', short: 'PIŁ', axis: 'Ochrona', label: 'Ochrona piłki (TOV%)', value: pc.tov_rate ?? null, display: fmt(m.tov_rate, 1, '%') },
-    { key: 'trb_rate', short: 'ZBI', axis: 'Zbiórki', label: 'Zbiórki (TRB%)', value: pc.trb_rate ?? null, display: fmt(m.trb_rate, 1, '%') },
-    { key: 'def', short: 'OBR', axis: 'Obrona', label: 'Obrona (Impact DEF)', value: pc.def ?? null, display: fmt(impact.def, 2) },
-    { key: 'usage', short: 'UDZ', axis: 'Udział', label: 'Udział w akcjach (USG%)', value: pc.usage ?? null, display: fmt(m.usage, 1, '%') },
+    make('scoring_100', 'PTS', 'Punkty', 'Punkty na 100 posiadań', fmt(f.scoring_100)),
+    make('ts', 'TS%', 'Skuteczność', 'True Shooting %', fmt(m.ts, 1, '%')),
+    make('ast_rate', 'AST', 'Kreowanie', 'Assist Rate (AST%)', fmt(m.ast_rate, 1, '%')),
+    make('tov_rate', 'TOV', 'Ochrona piłki', 'Turnover Rate (TOV%)', fmt(m.tov_rate, 1, '%')),
+    make('stl_rate', 'STL', 'Przechwyty', 'Steal Rate (STL%)', fmt(m.stl_rate, 2, '%')),
+    make('blk_rate', 'BLK', 'Bloki', 'Block Rate (BLK%)', fmt(m.blk_rate, 2, '%')),
   ];
 }
 

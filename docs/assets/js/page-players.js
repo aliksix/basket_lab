@@ -4,8 +4,8 @@ import {
   avatar, dataTable, el, fail, initTooltips, load, mountChrome,
   num, percentileColor, restoreTheme, signed,
 } from './core.js';
-import { pppOnCourt, skillAxes } from './metrics.js';
-import { radar } from './charts.js';
+import { playerSkills, pppOnCourt } from './metrics.js';
+import { skillBars } from './charts.js';
 
 restoreTheme();
 
@@ -91,27 +91,41 @@ function tile(player) {
           `#${player.shirt || '–'} · ${player.position || '–'} · `
           + `${num((player.min || 0) / Math.max(player.gp, 1), 1)} min`))),
 
-    el('div', { class: 'ptile__ratings' },
-      ratingCell('impact', 'IMPACT', player.impact?.total, player.percentiles?.total),
-      ratingCell('impact_off', 'OFF', player.impact?.off, player.percentiles?.off),
-      ratingCell('impact_def', 'DEF', player.impact?.def, player.percentiles?.def)),
+    el('div', { class: 'ptile__epm', 'data-metric': 'impact' },
+      el('small', {}, 'IMPACT'),
+      el('div', { class: 'ptile__epm-row' },
+        tinted(el('b', {}, signed(player.impact?.total, 1)), player.percentiles?.total),
+        el('span', {}, placeLabel(player, 'total')))),
+
+    el('div', { class: 'ptile__split' },
+      splitCell('impact_off', 'OFF', player, 'off'),
+      splitCell('impact_def', 'DEF', player, 'def')),
 
     el('div', { class: 'ptile__line' },
       el('span', {}, el('b', {}, num(player.metrics?.per_game?.pts, 1)), ' PKT'),
       el('span', { 'data-metric': 'ppp_ind' }, el('b', {}, num(player.metrics?.ppp_ind, 2)), ' PPP'),
       el('span', { 'data-metric': 'ppp_on' }, el('b', {}, num(pppOnCourt(player), 2)), ' PPP ON')),
 
-    el('div', { class: 'ptile__radar' }, radar(skillAxes(player), { size: 190, compact: true })));
+    el('div', { class: 'ptile__skills' }, skillBars(playerSkills(player), { compact: true })));
 }
 
-/** Jedna z trzech ocen na kafelku: nazwa, wartosc w kolorze percentyla, percentyl. */
-function ratingCell(metric, label, value, percentile) {
-  const cell = el('div', { class: 'ptile__rating', 'data-metric': metric },
+/** Miejsce w lidze w formacie "#12 z 82". */
+function placeLabel(player, key) {
+  const place = player.ranks?.[key];
+  if (!place) return '–';
+  return player.ranked_of ? `#${place} z ${player.ranked_of}` : `#${place}`;
+}
+
+function tinted(node, percentile) {
+  node.style.color = percentileColor(percentile);
+  return node;
+}
+
+function splitCell(metric, label, player, key) {
+  return el('div', { class: 'ptile__split-cell', 'data-metric': metric },
     el('small', {}, label),
-    el('b', {}, signed(value, 1)),
-    el('i', {}, percentile === null || percentile === undefined ? '–' : Math.round(percentile) + ' pct'));
-  cell.querySelector('b').style.color = percentileColor(percentile);
-  return cell;
+    tinted(el('b', {}, signed(player.impact?.[key], 1)), player.percentiles?.[key]),
+    el('span', {}, player.ranks?.[key] ? '#' + player.ranks[key] : '–'));
 }
 
 function table(list) {

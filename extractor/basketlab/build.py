@@ -487,14 +487,20 @@ class SiteBuilder:
         for entry in payload.values():
             entry.setdefault("percentiles", {})
             entry.setdefault("percentiles_pos", {})
+            entry.setdefault("ranks", {})
         for section, metric, higher in specs:
             values = {k: _value(v, section, metric) for k, v in pool.items()}
             for key, rank in metrics.percentile_ranks(values, higher).items():
                 payload[key]["percentiles"][metric] = rank
+            # miejsce w stawce - Dunks & Threes podaje je obok oceny zamiast percentyla
+            for key, place in metrics.ranks(values, higher).items():
+                payload[key]["ranks"][metric] = place
             for members in groups.values():
                 subset = {k: values[k] for k in members}
                 for key, rank in metrics.percentile_ranks(subset, higher).items():
                     payload[key]["percentiles_pos"][metric] = rank
+        for entry in payload.values():
+            entry["ranked_of"] = len(pool)
 
     # -- piatki --------------------------------------------------------------
     def _lineups(self, ratings, league_ortg: float):

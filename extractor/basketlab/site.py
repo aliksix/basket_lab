@@ -153,6 +153,8 @@ def player_tile(entry: Mapping[str, Any]) -> dict[str, Any]:
         "on_off": entry.get("on_off", {}),
         "percentiles": entry.get("percentiles", {}),
         "percentiles_pos": entry.get("percentiles_pos", {}),
+        "ranks": entry.get("ranks", {}),
+        "ranked_of": entry.get("ranked_of"),
     }
 
 

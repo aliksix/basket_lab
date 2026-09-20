@@ -6,9 +6,9 @@ import {
 } from './core.js';
 import {
   FILTERS, ZONES14, addStats, clutchRatings, efg, emptyStats, expectedPps, fgaLongRate,
-  pppLong, pppOnCourt, skillAxes, sumBuckets, ts, zoneProfile, zonesFromShots,
+  playerSkills, pppLong, pppOnCourt, sumBuckets, ts, zoneProfile, zonesFromShots,
 } from './metrics.js';
-import { divergingBars, formLine, radar, shotDiet } from './charts.js';
+import { divergingBars, formLine, shotDiet, skillBars } from './charts.js';
 import { shotChart, shotLegend, shotModeSwitch } from './court.js';
 
 restoreTheme();
@@ -281,11 +281,15 @@ function impactSection() {
       el('div', { class: 'prow__val' }, signed(value, 2))));
   }
 
+  const place = (key) => {
+    const rank = player.ranks?.[key];
+    return rank ? `#${rank}${player.ranked_of ? ' z ' + player.ranked_of : ''}` : null;
+  };
   return section('Wpływ na grę', 'BasketLab Impact = skorygowane on/off + model box-score dopasowany do 1 LM',
     el('div', { class: 'grid grid--impact' },
-      statTile({ metric: 'impact', value: signed(impact.total, 1), percentile: pc?.total }),
-      statTile({ metric: 'impact_off', value: signed(impact.off, 1), percentile: pc?.off }),
-      statTile({ metric: 'impact_def', value: signed(impact.def, 1), percentile: pc?.def }),
+      statTile({ metric: 'impact', value: signed(impact.total, 1), percentile: pc?.total, hint: place('total') }),
+      statTile({ metric: 'impact_off', value: signed(impact.off, 1), percentile: pc?.off, hint: place('off') }),
+      statTile({ metric: 'impact_def', value: signed(impact.def, 1), percentile: pc?.def, hint: place('def') }),
       parts));
 }
 
@@ -338,8 +342,8 @@ function percentilesSection() {
 
   const profile = el('div', { class: 'card' },
     el('div', { class: 'card__head' }, el('h2', {}, 'Profil umiejętności'),
-      el('span', { class: 'card__sub' }, 'każda oś to percentyl w lidze')),
-    radar(skillAxes(player, scope), { size: 300 }),
+      el('span', { class: 'card__sub' }, 'percentyl w lidze')),
+    skillBars(playerSkills(player, scope)),
     el('div', { class: 'grid grid--3', style: 'margin-top:12px' },
       statTile({ metric: 'ppp_ind', value: num(player.metrics?.ppp_ind, 2) }),
       statTile({ metric: 'ppp_on', value: num(pppOnCourt(player), 2) }),
