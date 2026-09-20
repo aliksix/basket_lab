@@ -1,19 +1,13 @@
 /* Kafle zawodnikow - skrot profilu: wplyw, percentyle umiejetnosci, podstawy. */
 
 import {
-  avatar, dataTable, el, fail, initTooltips, load, metricLabel, mountChrome,
+  avatar, dataTable, el, fail, initTooltips, load, mountChrome,
   num, percentileColor, restoreTheme, signed,
 } from './core.js';
+import { pppOnCourt, skillAxes } from './metrics.js';
+import { radar } from './charts.js';
 
 restoreTheme();
-
-const SKILLS = [
-  { key: 'scoring', label: 'Punkty', metric: 'ts', pick: (p) => p.percentiles?.ts },
-  { key: 'creation', label: 'Kreowanie', metric: 'ast_rate', pick: (p) => p.percentiles?.ast_rate },
-  { key: 'rebounding', label: 'Zbiórki', metric: 'trb_rate', pick: (p) => p.percentiles?.trb_rate },
-  { key: 'defense', label: 'Obrona', metric: 'impact_def', pick: (p) => p.percentiles?.def },
-  { key: 'usage', label: 'Udział', metric: 'usage', pick: (p) => p.percentiles?.usage },
-];
 
 const state = { sort: 'impact', view: 'tiles', search: '' };
 let meta;
@@ -88,38 +82,36 @@ function tiles(list) {
 }
 
 function tile(player) {
-  const impact = player.impact?.total;
-  const photo = avatar(player);
-
-  const bars = el('div', { class: 'ptile__bars' });
-  for (const skill of SKILLS) {
-    const value = skill.pick(player);
-    const bar = el('div', { class: 'pbar' });
-    const fill = el('i');
-    fill.style.width = Math.max(2, value ?? 0) + '%';
-    fill.style.background = percentileColor(value);
-    bar.append(fill);
-    bars.append(el('div', { class: 'ptile__row', 'data-metric': skill.metric },
-      el('span', {}, skill.label), bar, el('span', {}, value === null || value === undefined ? '–' : Math.round(value))));
-  }
-
   return el('a', { class: 'ptile', href: `player.html?p=${encodeURIComponent(player.key)}` },
-    el('div', { class: 'ptile__top' }, photo,
+    el('div', { class: 'ptile__top' },
+      avatar(player),
       el('div', { class: 'ptile__id' },
         el('div', { class: 'ptile__name' }, player.name),
         el('div', { class: 'ptile__meta' },
-          `#${player.shirt || '–'} · ${player.position || '–'} · ${player.gp} ${player.gp === 1 ? 'mecz' : 'meczów'} · ${num((player.min || 0) / Math.max(player.gp, 1), 1)} min`))),
-    el('div', { class: 'ptile__impact' },
-      el('b', { class: impact >= 0 ? 'delta--up' : 'delta--down' }, signed(impact, 1)),
-      el('span', { class: 'muted', style: 'font-size:.74rem' },
-        `${metricLabel('impact')} · ${player.percentiles?.total === undefined || player.percentiles?.total === null ? '–' : Math.round(player.percentiles.total) + ' pct'}`),
-      el('span', { class: 'q', 'data-metric': 'impact', style: 'margin-left:auto' }, '?')),
+          `#${player.shirt || '–'} · ${player.position || '–'} · `
+          + `${num((player.min || 0) / Math.max(player.gp, 1), 1)} min`))),
+
+    el('div', { class: 'ptile__ratings' },
+      ratingCell('impact', 'IMPACT', player.impact?.total, player.percentiles?.total),
+      ratingCell('impact_off', 'OFF', player.impact?.off, player.percentiles?.off),
+      ratingCell('impact_def', 'DEF', player.impact?.def, player.percentiles?.def)),
+
     el('div', { class: 'ptile__line' },
       el('span', {}, el('b', {}, num(player.metrics?.per_game?.pts, 1)), ' PKT'),
-      el('span', {}, el('b', {}, num(player.metrics?.per_game?.trb, 1)), ' ZB'),
-      el('span', {}, el('b', {}, num(player.metrics?.per_game?.ast, 1)), ' AS'),
-      el('span', {}, el('b', {}, num(player.metrics?.ts, 1)), ' TS%')),
-    bars);
+      el('span', { 'data-metric': 'ppp_ind' }, el('b', {}, num(player.metrics?.ppp_ind, 2)), ' PPP'),
+      el('span', { 'data-metric': 'ppp_on' }, el('b', {}, num(pppOnCourt(player), 2)), ' PPP ON')),
+
+    el('div', { class: 'ptile__radar' }, radar(skillAxes(player), { size: 190, compact: true })));
+}
+
+/** Jedna z trzech ocen na kafelku: nazwa, wartosc w kolorze percentyla, percentyl. */
+function ratingCell(metric, label, value, percentile) {
+  const cell = el('div', { class: 'ptile__rating', 'data-metric': metric },
+    el('small', {}, label),
+    el('b', {}, signed(value, 1)),
+    el('i', {}, percentile === null || percentile === undefined ? '–' : Math.round(percentile) + ' pct'));
+  cell.querySelector('b').style.color = percentileColor(percentile);
+  return cell;
 }
 
 function table(list) {

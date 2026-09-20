@@ -6,9 +6,9 @@ import {
 } from './core.js';
 import {
   FILTERS, ZONES14, addStats, clutchRatings, efg, emptyStats, expectedPps, fgaLongRate,
-  pppLong, sumBuckets, ts, zoneProfile, zonesFromShots,
+  pppLong, pppOnCourt, skillAxes, sumBuckets, ts, zoneProfile, zonesFromShots,
 } from './metrics.js';
-import { divergingBars, formLine, shotDiet } from './charts.js';
+import { divergingBars, formLine, radar, shotDiet } from './charts.js';
 import { shotChart, shotLegend, shotModeSwitch } from './court.js';
 
 restoreTheme();
@@ -328,14 +328,27 @@ function column(rows) {
 
 /* --- percentyle ------------------------------------------------------------ */
 function percentilesSection() {
-  const pc = state.scope === 'pos' ? player.percentiles_pos : player.percentiles;
+  const scope = state.scope === 'pos' ? 'percentiles_pos' : 'percentiles';
+  const pc = player[scope] || player.percentiles;
   const m = player.metrics || {};
   const card = el('div', { class: 'card' });
   for (const [key, label, pick] of PERCENTILE_ROWS) {
     card.append(percentileRow({ metric: key, label, value: pick(m), percentile: pc?.[key] }));
   }
+
+  const profile = el('div', { class: 'card' },
+    el('div', { class: 'card__head' }, el('h2', {}, 'Profil umiejętności'),
+      el('span', { class: 'card__sub' }, 'każda oś to percentyl w lidze')),
+    radar(skillAxes(player, scope), { size: 300 }),
+    el('div', { class: 'grid grid--3', style: 'margin-top:12px' },
+      statTile({ metric: 'ppp_ind', value: num(player.metrics?.ppp_ind, 2) }),
+      statTile({ metric: 'ppp_on', value: num(pppOnCourt(player), 2) }),
+      statTile({ metric: 'usage', value: num(player.metrics?.usage, 1), suffix: '%',
+        percentile: pc?.usage })));
+
   return section('Percentyle sezonowe',
-    state.scope === 'pos' ? 'porównanie wewnątrz grupy pozycyjnej' : 'porównanie z całą ligą', card);
+    state.scope === 'pos' ? 'porównanie wewnątrz grupy pozycyjnej' : 'porównanie z całą ligą',
+    el('div', { class: 'grid grid--2' }, card, profile));
 }
 
 /* --- on/off ---------------------------------------------------------------- */

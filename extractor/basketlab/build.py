@@ -202,6 +202,14 @@ def player_metrics(
         "stl_rate": _r(metrics.steal_rate(totals, team_totals, opp_poss), 2),
         "blk_rate": _r(metrics.block_rate(totals, team_totals, opp_totals), 2),
         "ast_to": _r(metrics.safe_div(totals.get("ast", 0), totals.get("tov", 0)), 2),
+        # PPP indywidualne: punkty na jedno posiadanie zakonczone jego akcja
+        "ppp_ind": _r(
+            metrics.safe_div(
+                totals.get("pts", 0),
+                totals.get("fga", 0) + 0.44 * totals.get("fta", 0) + totals.get("tov", 0),
+            ),
+            3,
+        ),
         "per_game": {k: _r(metrics.safe_div(totals.get(k, 0), gp)) for k in per_game_keys},
         "per40": {k: _r(v) for k, v in metrics.per_minutes(totals, per_game_keys[:-4] + ["fga", "tpa", "fta"]).items()},
     }
@@ -468,6 +476,9 @@ class SiteBuilder:
             ("metrics", "drb_rate", True), ("metrics", "trb_rate", True), ("metrics", "stl_rate", True),
             ("metrics", "blk_rate", True), ("metrics", "ftr", True), ("metrics", "tpar", True),
             ("impact", "total", True), ("impact", "off", True), ("impact", "def", True),
+            # osie wykresu radarowego i kafla zawodnika
+            ("metrics", "ppp_ind", True), ("features", "scoring_100", True),
+            ("on_off", "on_ortg", True), ("on_off", "on_drtg", False),
         ]
         groups = defaultdict(list)
         for key, entry in pool.items():

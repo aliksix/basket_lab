@@ -196,6 +196,37 @@ export function clutchRatings(b) {
   };
 }
 
+/* --- profil umiejetnosci --------------------------------------------------- */
+const fmt = (v, digits = 1, suffix = '') =>
+  (v === null || v === undefined ? '–' : Number(v).toFixed(digits) + suffix);
+
+/**
+ * Osie wykresu radarowego zawodnika. Wartoscia jest zawsze percentyl w lidze,
+ * zeby wszystkie osie byly porownywalne; surowa liczba trafia do dymka.
+ */
+export function skillAxes(player, scope = 'percentiles') {
+  const pc = player[scope] || player.percentiles || {};
+  const m = player.metrics || {};
+  const f = player.features || {};
+  const impact = player.impact || {};
+  // short - kafel, axis - duzy wykres, label - dymek
+  return [
+    { key: 'scoring_100', short: 'PKT', axis: 'Punkty', label: 'Punkty na 100 posiadań', value: pc.scoring_100 ?? null, display: fmt(f.scoring_100) },
+    { key: 'ts', short: 'RZU', axis: 'Rzuty', label: 'Skuteczność rzutowa (TS%)', value: pc.ts ?? null, display: fmt(m.ts, 1, '%') },
+    { key: 'ast_rate', short: 'KRE', axis: 'Kreowanie', label: 'Kreowanie gry (AST%)', value: pc.ast_rate ?? null, display: fmt(m.ast_rate, 1, '%') },
+    { key: 'tov_rate', short: 'PIŁ', axis: 'Ochrona', label: 'Ochrona piłki (TOV%)', value: pc.tov_rate ?? null, display: fmt(m.tov_rate, 1, '%') },
+    { key: 'trb_rate', short: 'ZBI', axis: 'Zbiórki', label: 'Zbiórki (TRB%)', value: pc.trb_rate ?? null, display: fmt(m.trb_rate, 1, '%') },
+    { key: 'def', short: 'OBR', axis: 'Obrona', label: 'Obrona (Impact DEF)', value: pc.def ?? null, display: fmt(impact.def, 2) },
+    { key: 'usage', short: 'UDZ', axis: 'Udział', label: 'Udział w akcjach (USG%)', value: pc.usage ?? null, display: fmt(m.usage, 1, '%') },
+  ];
+}
+
+/** PPP zespolu, gdy zawodnik jest na parkiecie. */
+export function pppOnCourt(player) {
+  const rating = player.on_off?.on_ortg;
+  return rating === null || rating === undefined ? null : rating / 100;
+}
+
 /* --- rankingi -------------------------------------------------------------- */
 /** Miejsce kazdej druzyny wedlug wskaznika (1 = najlepsze). */
 export function rankMap(values, higherIsBetter = true) {

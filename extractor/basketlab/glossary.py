@@ -275,6 +275,23 @@ GLOSSARY: dict[str, dict[str, str]] = {
         "desc": "Odsetek posiadań, w których pierwsza szansa trwała co najmniej 15 sekund.",
         "how": "Wysoka wartość oznacza grę przeciwko ustawionej obronie, niska - dużo szybkiego ataku.",
     },
+    "ppp_ind": {
+        "label": "PPP",
+        "full": "Punkty na posiadanie zawodnika",
+        "desc": "Punkty podzielone przez posiadania zakończone jego akcją: rzut, rzuty wolne albo strata.",
+        "how": "Wzór: PTS / (FGA + 0.44 × FTA + TOV). Mierzy, ile zespół dostaje z każdej akcji oddanej temu zawodnikowi.",
+    },
+    "ppp_on": {
+        "label": "PPP ON",
+        "full": "PPP zespołu na parkiecie",
+        "desc": "Punkty zespołu na jedno posiadanie, gdy zawodnik jest na boisku.",
+        "how": "To samo co ORTG (on) podzielone przez 100 — opisuje cały atak, nie tylko jego akcje.",
+    },
+    "scoring_100": {
+        "label": "PUNKTY / 100",
+        "full": "Punkty na 100 posiadań",
+        "desc": "Wolumen zdobywania punktów niezależny od liczby minut i tempa gry.",
+    },
     "synergy": {
         "label": "SYNERGIA",
         "full": "Chemistry",

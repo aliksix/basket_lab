@@ -1,6 +1,6 @@
 /* Lekkie wykresy inline (SVG, bez bibliotek) - slupki, linia formy, mapa stylu. */
 
-import { el, num, dateLabel, zoneName } from './core.js';
+import { el, num, dateLabel, percentileColor, zoneName } from './core.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const svgEl = (tag, attrs = {}) => {
@@ -84,6 +84,74 @@ export function rollingMean(values, window) {
     if (!slice.length) return null;
     return slice.reduce((a, b) => a + b, 0) / slice.length;
   });
+}
+
+
+/* --- wykres radarowy umiejetnosci ------------------------------------------ */
+/**
+ * Radar percentyli. Kazda os ma wartosc 0-100, wiec siatka jest porownywalna
+ * miedzy zawodnikami - punkt na obwodzie to najlepszy wynik w lidze.
+ */
+export function radar(axes, { size = 200, levels = 4, compact = false } = {}) {
+  const usable = axes.filter((a) => a.value !== null && a.value !== undefined);
+  if (usable.length < 3) return el('div', { class: 'empty' }, 'Za mało danych');
+
+  // margines musi zmiescic podpis wychodzacy poziomo poza ostatni pierscien:
+  // odstep od siatki (9) + szerokosc tekstu (ok. 5.6 px na znak)
+  const caption = (a) => String((compact ? a.short : a.axis) ?? a.label ?? '');
+  const longest = Math.max(...axes.map((a) => caption(a).length));
+  const pad = Math.min(size * 0.3, 12 + 9 + longest * (compact ? 5.6 : 5.9));
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = size / 2 - pad;
+  const n = axes.length;
+  const angle = (i) => -Math.PI / 2 + (i * 2 * Math.PI) / n;
+  const point = (i, value) => [
+    cx + r * (value / 100) * Math.cos(angle(i)),
+    cy + r * (value / 100) * Math.sin(angle(i)),
+  ];
+  const ring = (value) => axes.map((_, i) => point(i, value).join(' ')).join(' L ');
+
+  const svg = svgEl('svg', { viewBox: `0 0 ${size} ${size}`, class: 'radar' });
+
+  for (let level = 1; level <= levels; level += 1) {
+    svg.append(svgEl('path', {
+      d: `M ${ring((100 * level) / levels)} Z`,
+      class: 'radar__grid',
+    }));
+  }
+  axes.forEach((_, i) => {
+    const [x, y] = point(i, 100);
+    svg.append(svgEl('line', { x1: cx, y1: cy, x2: x, y2: y, class: 'radar__spoke' }));
+  });
+
+  svg.append(svgEl('path', {
+    d: `M ${axes.map((a, i) => point(i, Math.max(a.value ?? 0, 2)).join(' ')).join(' L ')} Z`,
+    class: 'radar__area',
+  }));
+
+  axes.forEach((axis, i) => {
+    const [x, y] = point(i, Math.max(axis.value ?? 0, 2));
+    const dot = svgEl('circle', { cx: x, cy: y, r: compact ? 2.6 : 3.4, fill: percentileColor(axis.value) });
+    dot.dataset.tip = `<b>${axis.label}</b>${axis.display ?? '–'}`
+      + `<em>${axis.value === null || axis.value === undefined ? 'brak danych' : Math.round(axis.value) + '. percentyl w lidze'}</em>`;
+    svg.append(dot);
+
+    const [lx, ly] = point(i, 100);
+    const dx = Math.cos(angle(i));
+    const dy = Math.sin(angle(i));
+    const anchor = dx > 0.25 ? 'start' : dx < -0.25 ? 'end' : 'middle';
+    const node = svgEl('text', {
+      x: lx + dx * 9,
+      y: ly + dy * 9 + 3.5,
+      class: 'radar__label',
+      'text-anchor': anchor,
+    });
+    node.textContent = caption(axis);
+    node.dataset.tip = `<b>${axis.label}</b>${axis.display ?? '–'}`;
+    svg.append(node);
+  });
+  return svg;
 }
 
 /** Kolor punktu wedlug bilansu na 100 posiadan (+/- 15 to skrajnosci skali). */

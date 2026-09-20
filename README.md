@@ -169,7 +169,7 @@ błękit `#3A5BD9`). Motyw jasny i ciemny przełącznikiem w prawym górnym rogu
 | Strona | Zawartość |
 | --- | --- |
 | `index.html` | panel drużyny: OFF/DEF/NET RTG, tempo, ratingi skorygowane, Four Factors, profil rzutowy, forma mecz po meczu, tabela ligi, mapa stylu |
-| `players.html` | kafle zawodników ze zdjęciem, podstawami i percentylami umiejętności |
+| `players.html` | kafle zawodników: Impact z rozbiciem na OFF/DEF wraz z percentylami, PPP indywidualne i zespołowe, radar umiejętności |
 | `player.html?p=…` | profil: rozbicie wpływu, percentyle, on/off, Shooting Lab (mapa rzutów + strefy + xPTS), mecz po meczu |
 | `games.html?m=…` | pełne play-by-play meczu, filtr po zawodniku i kwarcie, posiadania |
 | `lineups.html` | piątki z miniaturami zdjęć, tabela piątek, tabela duetów z synergią |
@@ -194,6 +194,23 @@ Kolor strefy to PPS na tle ligi w tej samej strefie, **wytłumiony przy małej
 próbie** (`n / (n + 8)`) — jedna trafiona trójka nie zabarwia całego sektora na
 intensywną zieleń. Kafelki hex porównują się do oczekiwanego PPS wynikającego
 z tego, skąd padły rzuty, więc kolor mówi o trafianiu, a nie o doborze pozycji.
+
+### Karta zawodnika
+
+Układ wzorowany na Dunks & Threes: trzy oceny z percentylem (Impact, OFF, DEF),
+wiersz produkcji i radar siedmiu umiejętności. Osie radaru to zawsze percentyl
+w lidze, więc są porównywalne między sobą i między zawodnikami; surowa wartość
+trafia do dymka.
+
+Dwa różne PPP, celowo pokazywane obok siebie:
+
+| | Co liczy |
+| --- | --- |
+| **PPP** | `PTS / (FGA + 0.44 × FTA + TOV)` — punkty na posiadanie zakończone akcją tego zawodnika |
+| **PPP ON** | punkty zespołu na posiadanie, gdy zawodnik jest na parkiecie (czyli ORTG on / 100) |
+
+Pierwsze mówi o jego własnej efektywności, drugie o tym, jak radzi sobie cały
+atak przy nim — to nie to samo i rozjazd między nimi bywa najciekawszy.
 
 ### Filtry
 
