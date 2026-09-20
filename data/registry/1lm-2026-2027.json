@@ -69,6 +69,17 @@
       "fiba_id": 2905346,
       "fiba_home": "Enea Basket Poznań",
       "fiba_away": "Weegree AZS Politechnika Opolska"
+    },
+    {
+      "pzkosz_id": "223886",
+      "round": 1,
+      "date": "2026-09-20",
+      "home": "OPTeam Resovia Rzeszów",
+      "away": "Datzzy Kotwica Port Kołobrzeg",
+      "home_score": 80,
+      "away_score": 94,
+      "finished": true,
+      "fiba_id": 2906447
     }
   ],
   "checked": [
