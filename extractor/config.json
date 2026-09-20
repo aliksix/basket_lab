@@ -1,0 +1,15 @@
+{
+  "club": {
+    "name": "KKS Basket Poznań",
+    "official": "Enea Basket Poznań"
+  },
+  "competition": "PZKosz 1 Liga Mężczyzn",
+  "season": "2026/2027",
+  "pzkosz_base": "https://1lm.pzkosz.pl",
+  "archive_id": null,
+  "registry": "data/registry/1lm-2026-2027.json",
+  "cache_dir": "data/raw/cache",
+  "out_dir": "docs/data",
+  "assets_dir": "docs/assets",
+  "scan_range": "2902000-2908000"
+}

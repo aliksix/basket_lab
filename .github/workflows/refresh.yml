@@ -1,0 +1,49 @@
+name: Odswiezenie danych
+
+# Po kazdej kolejce dociagamy nowe mecze: najpierw szukamy identyfikatorow
+# LiveStats dla meczow, ktore pojawily sie w terminarzu PZKosz, potem
+# przeliczamy komplet danych portalu i commitujemy katalog docs/data.
+
+on:
+  schedule:
+    - cron: "0 5 * * 1,2"   # poniedzialek i wtorek rano, po weekendowych kolejkach
+  workflow_dispatch:
+    inputs:
+      range:
+        description: "Zakres skanu identyfikatorow LiveStats (np. 2902000-2908000)"
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Znajdz nowe mecze
+        working-directory: extractor
+        run: |
+          python -m basketlab --refresh discover --step 1 --workers 12 \
+            ${{ github.event.inputs.range && format('--range {0}', github.event.inputs.range) || '--rescan' }}
+
+      - name: Przelicz dane portalu
+        working-directory: extractor
+        run: python -m basketlab build
+
+      - name: Zapisz zmiany
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data docs/assets/logos docs/assets/players data/registry
+          if git diff --cached --quiet; then
+            echo "brak nowych danych"
+          else
+            git commit -m "dane: odswiezenie po kolejce"
+            git push
+          fi

@@ -1,0 +1,84 @@
+{
+  "season": "2026/2027",
+  "competition": "PZKosz 1 Liga Mężczyzn",
+  "matches": [
+    {
+      "pzkosz_id": "223885",
+      "round": 1,
+      "date": "2026-09-18",
+      "tipoff": "2026-09-18T18:00:00+02:00",
+      "venue": "WKK Sport Center",
+      "city": "Wrocław",
+      "home": "WKK Active Hotel Wrocław",
+      "away": "KSK Qemetica Noteć Inowrocław",
+      "home_score": 66,
+      "away_score": 80,
+      "finished": true,
+      "url": "https://1lm.pzkosz.pl/mecz/223885/wkk-active-hotel-wroclaw---ksk-qemetica-notec-inowroclaw.html",
+      "fiba_id": 2902819,
+      "fiba_home": "WKK Active Hotel Wrocław",
+      "fiba_away": "KSK Qemetica Noteć Inowrocław"
+    },
+    {
+      "pzkosz_id": "223889",
+      "round": 1,
+      "date": "2026-09-19",
+      "tipoff": "2026-09-19T20:00:00+02:00",
+      "venue": "Hala Sportowa",
+      "city": "Tychy",
+      "home": "GKS Tychy",
+      "away": "PGE Spójnia Stargard",
+      "home_score": 81,
+      "away_score": 83,
+      "finished": true,
+      "url": "https://1lm.pzkosz.pl/mecz/223889/gks-tychy---pge-spojnia-stargard.html",
+      "fiba_id": 2905344,
+      "fiba_home": "GKS Tychy",
+      "fiba_away": "PGE Spójnia Stargard"
+    },
+    {
+      "pzkosz_id": "223890",
+      "round": 1,
+      "date": "2026-09-19",
+      "tipoff": "2026-09-19T15:00:00+02:00",
+      "venue": "Hala Na Skarpie",
+      "city": "Bytom",
+      "home": "BS Polonia Bytom",
+      "away": "Miasto Szkła Krosno",
+      "home_score": 91,
+      "away_score": 85,
+      "finished": true,
+      "url": "https://1lm.pzkosz.pl/mecz/223890/bs-polonia-bytom---miasto-szkla-krosno.html",
+      "fiba_id": 2905345,
+      "fiba_home": "BS Polonia Bytom",
+      "fiba_away": "Miasto Szkła Krosno"
+    },
+    {
+      "pzkosz_id": "223891",
+      "round": 1,
+      "date": "2026-09-19",
+      "tipoff": "2026-09-19T18:00:00+02:00",
+      "venue": "Hala AWF",
+      "city": "Poznań",
+      "home": "Enea Basket Poznań",
+      "away": "Weegree AZS Politechnika Opolska",
+      "home_score": 96,
+      "away_score": 75,
+      "finished": true,
+      "url": "https://1lm.pzkosz.pl/mecz/223891/enea-basket-poznan---weegree-azs-politechnika-opolska.html",
+      "fiba_id": 2905346,
+      "fiba_home": "Enea Basket Poznań",
+      "fiba_away": "Weegree AZS Politechnika Opolska"
+    }
+  ],
+  "checked": [
+    [
+      2902559,
+      2903079
+    ],
+    [
+      2905084,
+      2905606
+    ]
+  ]
+}
