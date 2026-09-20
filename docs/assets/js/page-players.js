@@ -1,7 +1,7 @@
 /* Kafle zawodnikow - skrot profilu: wplyw, percentyle umiejetnosci, podstawy. */
 
 import {
-  avatar, dataTable, el, fail, initTooltips, load, mountChrome,
+  dataTable, el, fail, initTooltips, load, mountChrome, portrait,
   num, percentileColor, restoreTheme, signed,
 } from './core.js';
 import { playerSkills, pppOnCourt } from './metrics.js';
@@ -84,7 +84,7 @@ function tiles(list) {
 function tile(player) {
   return el('a', { class: 'ptile', href: `player.html?p=${encodeURIComponent(player.key)}` },
     el('div', { class: 'ptile__top' },
-      avatar(player),
+      portrait(player),
       el('div', { class: 'ptile__id' },
         el('div', { class: 'ptile__name' }, player.name),
         el('div', { class: 'ptile__meta' },

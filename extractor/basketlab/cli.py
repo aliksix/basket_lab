@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from . import discover as discover_mod
-from . import fiba, pzkosz
+from . import fiba, photos as photos_mod, pzkosz
 from .build import BuildConfig, SiteBuilder
 from .http import Fetcher
 from .site import write_site
@@ -169,6 +169,29 @@ def cmd_add(args, cfg) -> None:
     print("dopisano mecz {} ({} {}:{} {})".format(fiba_id, game.teams[1].name, game.teams[1].score, game.teams[2].score, game.teams[2].name))
 
 
+def cmd_photos(args, cfg) -> None:
+    """Pobiera portrety z PZKosz i zapisuje je z przezroczystym tlem."""
+    fetcher = _fetcher(cfg, args)
+    out_dir = ROOT / cfg.get("out_dir", "docs/data")
+    assets = ROOT / cfg.get("assets_dir", "docs/assets") / "players"
+    players_file = out_dir / "players.json"
+    if not players_file.exists():
+        raise SystemExit("Najpierw uruchom `basketlab build` - brak {}".format(players_file))
+
+    players = json.loads(players_file.read_text(encoding="utf-8"))
+    written = photos_mod.build_photos(
+        fetcher,
+        cfg["club"]["official"],
+        players,
+        assets,
+        size=args.size,
+        base=cfg.get("pzkosz_base", pzkosz.DEFAULT_BASE),
+    )
+    print("przetworzono {} z {} zawodnikow".format(len(written), len(players)))
+    if written:
+        print("uruchom ponownie `basketlab build`, zeby profile wskazaly nowe pliki")
+
+
 def cmd_verify(args, cfg) -> None:
     registry_path = Path(args.registry) if args.registry else ROOT / cfg["registry"]
     registry = discover_mod.Registry.load(registry_path)
@@ -254,6 +277,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--date")
     p.add_argument("--round", type=int)
     p.set_defaults(func=cmd_add)
+
+    p = sub.add_parser("photos", help="portrety z PZKosz z przezroczystym tlem (wymaga Pillow)")
+    p.add_argument("--size", type=int, default=photos_mod.OUTPUT_SIZE)
+    p.set_defaults(func=cmd_photos)
 
     p = sub.add_parser("verify", help="sprawdza poprawnosc wpisow w rejestrze")
     p.add_argument("--registry")

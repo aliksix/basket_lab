@@ -257,12 +257,19 @@ table.data .is-club td:first-child { color: var(--brand); }
   display: inline-block; position: relative;
 }
 .avatar img {
+  /* kadr jest wypalony w pliku przez `basketlab photos`, wiec bez skalowania */
   width: 100%; height: 100%; object-fit: cover; display: block;
-  /* przyblizenie na glowe i ramiona - inaczej w kole widac same marginesy tla */
-  transform: scale(1.42) translateY(10%);
-  transform-origin: 50% 50%;
 }
 .avatar--lg { width: 92px; height: 92px; }
+
+/* prostokatny portret - karty zawodnikow i naglowek profilu */
+.portrait {
+  width: 66px; height: 82px; border-radius: 11px; flex: none; overflow: hidden;
+  background: var(--surface-3); border: 1px solid var(--border);
+  display: inline-block; position: relative;
+}
+.portrait img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; display: block; }
+.portrait--lg { width: 104px; height: 128px; border-radius: 14px; }
 .ptile__name { font-weight: 650; font-size: .97rem; letter-spacing: -.012em; }
 .ptile__meta { color: var(--ink-muted); font-size: .75rem; margin-top: 3px; }
 .ptile__impact { display: flex; align-items: baseline; gap: 8px; padding: 0 16px 8px; }

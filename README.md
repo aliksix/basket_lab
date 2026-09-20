@@ -73,6 +73,9 @@ python -m basketlab verify
 
 # komplet danych dla portalu -> docs/data + docs/assets
 python -m basketlab build
+
+# portrety zawodnikow z PZKosz (wymaga Pillow, raz na sezon)
+python -m basketlab photos
 ```
 
 ### Rejestr meczów
@@ -137,6 +140,37 @@ python -m basketlab add 2905346 --pzkosz-id 223891 --date 2026-09-19 --round 1
   wskaźniki: **%FGA +15** (odsetek rzutów z długich akcji) i **PPP +15**
   (punkty na jedno długie posiadanie).
 
+### Portrety zawodników
+
+LiveStats podaje zdjęcia 200 × 200 z szerokim szarym tłem dookoła sylwetki.
+PZKosz trzyma te same sesje w wyższej rozdzielczości:
+
+```
+https://s1.static.esor.pzkosz.pl/internalfiles/image/zawodnicy
+    /s<sezon>/<klub>/600-600/<zawodnik>.jpg      # realnie 496 × 600
+```
+
+`basketlab photos` pobiera je i przycina, tworząc **dwa warianty na zawodnika**:
+
+| Plik | Format | Gdzie |
+| --- | --- | --- |
+| `<klucz>.webp` | 320 × ~420, prostokąt | karty zawodników, nagłówek profilu |
+| `<klucz>-icon.webp` | 192 × 192, ciasno na głowę | koła w tabelach, przy piątkach i duetach |
+
+Tło usuwa **wypełnienie od krawędzi kadru**, a nie próg koloru — próg zjadłby
+białe wykończenie koszulki i jasne logo, bo mają zbliżoną jasność do tła.
+Linię ramion wykrywa skok szerokości kolejnych wierszy maski, dzięki czemu kadr
+ikony trafia w głowę bez rozpoznawania twarzy.
+
+Kadr jest wypalony w pliku, więc portal nie skaluje ani nie przesuwa niczego
+w CSS — wystarczy `object-fit: cover`. Identyfikatory sezonu, klubu i zawodnika
+czytane są ze strony zawodnika, więc nic nie jest zaszyte w kodzie.
+
+Moduł jest jedynym miejscem wymagającym **Pillow**; reszta pakietu nie ma
+żadnych zależności zewnętrznych, dlatego zdjęcia przetwarza się osobnym
+poleceniem, a nie przy każdym `build`. Bez Pillow `build` działa normalnie
+i używa zdjęć z LiveStats.
+
 ### Struktura pakietu
 
 ```
@@ -154,6 +188,7 @@ extractor/basketlab/
   season.py       agregacja sezonu
   build.py        przeliczenie danych portalu
   site.py         zapis JSON-ów i zasobów do docs/
+  photos.py       portrety z PZKosz: wycięcie tła i kadrowanie (Pillow)
   glossary.py     słownik metryk (treść dymków)
   cli.py          interfejs wiersza poleceń
 ```

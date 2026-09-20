@@ -312,15 +312,22 @@ export function crumbs(...parts) {
 }
 
 /**
- * Okragly portret zawodnika.
+ * Okragla ikona zawodnika - ciasny kadr na glowe.
  *
- * Zdjecia z LiveStats to kwadraty z sylwetka posrodku i sporym marginesem tla,
- * wiec samo wyciecie kola zostawialoby puste pasy po bokach. Obrazek siedzi
- * w kadrze z ``overflow: hidden`` i jest przyblizany w CSS tak, zeby w kole
- * znalazla sie glowa i ramiona.
+ * Uzywana tam, gdzie zdjecie jest tylko znacznikiem: w tabelach, przy piatkach
+ * i duetach. Kadr jest wypalony w pliku przez `basketlab photos`, wiec kolo
+ * nie wymaga zadnego skalowania w CSS.
  */
 export function avatar(player, extra = '') {
   const frame = el('span', { class: ('avatar ' + extra).trim(), title: player?.name || '' });
+  const src = player?.icon || player?.photo;
+  if (src) frame.append(el('img', { src, alt: player.name || '', loading: 'lazy' }));
+  return frame;
+}
+
+/** Prostokatny portret zawodnika - na kartach i w naglowku profilu. */
+export function portrait(player, extra = '') {
+  const frame = el('span', { class: ('portrait ' + extra).trim(), title: player?.name || '' });
   if (player?.photo) {
     frame.append(el('img', { src: player.photo, alt: player.name || '', loading: 'lazy' }));
   }

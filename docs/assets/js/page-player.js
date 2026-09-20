@@ -1,8 +1,8 @@
 /* Profil zawodnika: wplyw i jego rozbicie, percentyle, mapa rzutow, mecz po meczu. */
 
 import {
-  avatar, crumbs, dataTable, dateLabel, el, fail, initTooltips, load, metricLabel,
-  mountChrome, num, percentileRow, qs, restoreTheme, signed, statTile, zoneName,
+  crumbs, dataTable, dateLabel, el, fail, initTooltips, load, metricLabel,
+  mountChrome, num, percentileRow, portrait, qs, restoreTheme, signed, statTile, zoneName,
 } from './core.js';
 import {
   FILTERS, ZONES14, addStats, clutchRatings, efg, emptyStats, expectedPps, fgaLongRate,
@@ -58,7 +58,7 @@ function renderHead() {
   head.replaceChildren(
     crumbs(['Zawodnicy', 'players.html'], player.name),
     el('div', { style: 'display:flex;gap:18px;align-items:center;flex-wrap:wrap' },
-      avatar(player, 'avatar--lg'),
+      portrait(player, 'portrait--lg'),
       el('div', {},
         el('h1', {}, player.name),
         el('p', {}, `#${player.shirt || '–'} · ${player.position || '–'} · `

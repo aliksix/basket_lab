@@ -144,7 +144,7 @@ def write_site(builder: SiteBuilder, payload: Mapping[str, Any], log=print) -> N
 
 
 def player_tile(entry: Mapping[str, Any]) -> dict[str, Any]:
-    keep = ("key", "name", "short", "shirt", "position", "photo", "team", "gp", "gs", "min")
+    keep = ("key", "name", "short", "shirt", "position", "photo", "icon", "team", "gp", "gs", "min")
     return {
         **{k: entry.get(k) for k in keep},
         "metrics": entry.get("metrics", {}),
@@ -241,6 +241,21 @@ def download_assets(builder: SiteBuilder, teams: dict[str, Any], players: dict[s
 
     for key, player in players.items():
         if player.get("team") != builder.club_key:
+            continue
+        # portret przygotowany przez `basketlab photos` ma pierwszenstwo:
+        # jest w wyzszej rozdzielczosci i z przezroczystym tlem
+        cutout = next(
+            (p for p in (photos / (slug(key) + ext) for ext in (".webp", ".png"))
+             if p.exists() and p.stat().st_size > 0),
+            None,
+        )
+        if cutout is not None:
+            player["photo"] = prefix + "players/" + cutout.name
+            # ciasny kadr na glowe do awatarow w kolach
+            icon = cutout.with_name(cutout.stem + "-icon" + cutout.suffix)
+            if icon.exists() and icon.stat().st_size > 0:
+                player["icon"] = prefix + "players/" + icon.name
+            saved += 1
             continue
         url = player.get("photo") or ""
         if not url.startswith("http"):
