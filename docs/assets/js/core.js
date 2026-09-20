@@ -311,12 +311,20 @@ export function crumbs(...parts) {
   return node;
 }
 
-/** Okragly portret zawodnika z zastepczym kolem, gdy brakuje zdjecia. */
+/**
+ * Okragly portret zawodnika.
+ *
+ * Zdjecia z LiveStats to kwadraty z sylwetka posrodku i sporym marginesem tla,
+ * wiec samo wyciecie kola zostawialoby puste pasy po bokach. Obrazek siedzi
+ * w kadrze z ``overflow: hidden`` i jest przyblizany w CSS tak, zeby w kole
+ * znalazla sie glowa i ramiona.
+ */
 export function avatar(player, extra = '') {
-  const cls = ('avatar ' + extra).trim();
-  return player?.photo
-    ? el('img', { class: cls, src: player.photo, alt: player.name || '', loading: 'lazy' })
-    : el('div', { class: cls, title: player?.name || '' });
+  const frame = el('span', { class: ('avatar ' + extra).trim(), title: player?.name || '' });
+  if (player?.photo) {
+    frame.append(el('img', { src: player.photo, alt: player.name || '', loading: 'lazy' }));
+  }
+  return frame;
 }
 
 export function fail(node, error) {

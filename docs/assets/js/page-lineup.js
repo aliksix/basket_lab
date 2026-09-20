@@ -49,6 +49,16 @@ function poss(row) {
   return (row.off_poss || 0) + (row.def_poss || 0);
 }
 
+/** Nazwiska piatki rywala; slug jest tylko awaryjnym zrodlem. */
+function oppNames(row) {
+  if (row.opp_names?.length) return row.opp_names;
+  return (row.opp_players || []).map((key) => {
+    const parts = key.split(':').pop().split('-');
+    const family = parts.length > 1 ? parts.slice(0, -1).join(' ') : parts[0];
+    return family.charAt(0).toUpperCase() + family.slice(1);
+  });
+}
+
 function renderHead() {
   const head = document.getElementById('head');
   const roster = el('div', { style: 'display:flex;gap:14px;flex-wrap:wrap;margin-top:12px' });
@@ -181,8 +191,8 @@ function matchupSection() {
       el('div', { class: 'card empty' }, 'Za mało wspólnych posiadań, żeby pokazać pojedynki piątek.'));
   }
   const columns = [
-    { key: 'opp', label: 'Piątka rywala', sortValue: (r) => r.opp_players.join(),
-      render: (r) => r.opp_players.map((k) => k.split(':').pop().split('-').slice(-1)[0]).join(' · ') },
+    { key: 'opp', label: 'Piątka rywala', sortValue: (r) => oppNames(r).join(),
+      render: (r) => oppNames(r).join(' · ') },
     { key: 'min', label: 'MIN' },
     { key: 'off_poss', label: 'POS ATAK', render: (r) => num(r.off_poss, 0) },
     { key: 'def_poss', label: 'POS OBRONA', render: (r) => num(r.def_poss, 0) },

@@ -164,7 +164,7 @@ h2 { font-size: 1.02rem; }
   padding: 11px 13px; background: var(--surface); border: 1px solid var(--border-soft);
   border-radius: var(--radius); margin-bottom: 20px; box-shadow: var(--shadow);
 }
-.seg { display: flex; gap: 2px; background: var(--surface-3); padding: 3px; border-radius: 10px; }
+.seg { display: flex; flex-wrap: wrap; gap: 2px; background: var(--surface-3); padding: 3px; border-radius: 10px; }
 .seg button {
   border: 0; background: transparent; color: var(--ink-dim); cursor: pointer;
   padding: 6px 13px; border-radius: 8px; font-size: .82rem; font-weight: 550; font-family: inherit;
@@ -175,6 +175,7 @@ h2 { font-size: 1.02rem; }
 .filters select, .filters input[type="search"] {
   background: var(--surface); border: 1px solid var(--border); color: var(--ink);
   border-radius: 9px; padding: 7px 11px; font-family: inherit; font-size: .85rem;
+  max-width: 100%; min-width: 0;
 }
 .filters__note { margin-left: auto; color: var(--ink-muted); font-size: .78rem; }
 
@@ -251,8 +252,15 @@ table.data .is-club td:first-child { color: var(--brand); }
 }
 .ptile__top { display: flex; gap: 13px; padding: 16px 16px 10px; align-items: center; }
 .avatar {
-  width: 62px; height: 62px; border-radius: 50%; object-fit: cover; flex: none;
+  width: 62px; height: 62px; border-radius: 50%; flex: none; overflow: hidden;
   background: var(--surface-3); border: 1px solid var(--border);
+  display: inline-block; position: relative;
+}
+.avatar img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  /* przyblizenie na glowe i ramiona - inaczej w kole widac same marginesy tla */
+  transform: scale(1.42) translateY(10%);
+  transform-origin: 50% 50%;
 }
 .avatar--lg { width: 92px; height: 92px; }
 .ptile__name { font-weight: 650; font-size: .97rem; letter-spacing: -.012em; }
@@ -330,9 +338,9 @@ table.data .is-club td:first-child { color: var(--brand); }
 }
 .chip--brand { background: var(--brand-soft); color: var(--brand); border-color: var(--brand-line); }
 .avatars { display: flex; }
-.avatars img, .avatars div {
-  width: 34px; height: 34px; border-radius: 50%; object-fit: cover;
-  border: 2px solid var(--surface); margin-left: -9px; background: var(--surface-3);
+.avatars .avatar {
+  width: 34px; height: 34px; border: 2px solid var(--surface);
+  margin-left: -9px; background: var(--surface-3);
 }
 .avatars > :first-child { margin-left: 0; }
 .muted { color: var(--ink-muted); }
@@ -352,6 +360,18 @@ table.data .is-club td:first-child { color: var(--brand); }
 .pbp__what b { font-weight: 620; }
 .pbp__what.is-made b { color: var(--good); }
 .pbp__what.is-miss b { color: var(--bad); }
+
+@media (max-width: 760px) {
+  .filters { padding: 10px; gap: 8px; }
+  .filters > .seg { width: 100%; }
+  .filters .seg button { flex: 1 1 auto; padding: 6px 9px; font-size: .78rem; }
+  .filters select, .filters input[type="search"] { flex: 1 1 100%; }
+  .filters__note { margin-left: 0; flex-basis: 100%; font-size: .74rem; }
+  .page-head h1 { font-size: 1.45rem; }
+  .card { padding: 14px; }
+  .grid--impact { grid-template-columns: 1fr 1fr; }
+  .stat__value { font-size: 1.7rem; }
+}
 
 @media (max-width: 960px) {
   .topbar__inner { height: auto; padding: 10px 18px; flex-wrap: wrap; gap: 12px; }

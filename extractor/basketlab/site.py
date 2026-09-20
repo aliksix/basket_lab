@@ -165,6 +165,9 @@ def lineup_matchups(s: Season, lineup: Mapping[str, Any]) -> list[dict[str, Any]
             other,
             {
                 "opp_players": list(other),
+                # klucz gracza to slug "nazwisko-imie" bez znakow diakrytycznych,
+                # wiec nazwy do wyswietlenia bierzemy z protokolu, a nie ze sluga
+                "opp_names": [player_label(s, key) for key in other],
                 "off_poss": 0.0,
                 "pts": 0.0,
                 "def_poss": 0.0,
@@ -200,6 +203,17 @@ def lineup_matchups(s: Season, lineup: Mapping[str, Any]) -> list[dict[str, Any]
 
 def slug(player_key: str) -> str:
     return player_key.replace(":", "__")
+
+
+def player_label(season: Season, key: str) -> str:
+    """Nazwa zawodnika do pokazania - z protokolu, z polskimi znakami."""
+    profile = season.players.get(key)
+    if profile:
+        return profile.get("short") or profile.get("name") or key
+    # zapasowo odtwarzamy z klucza: slug ma postac "nazwisko-imie"
+    parts = key.split(":")[-1].split("-")
+    family = " ".join(parts[:-1]) if len(parts) > 1 else parts[0]
+    return family.replace("_", " ").title()
 
 
 # --- zasoby graficzne ---------------------------------------------------------
