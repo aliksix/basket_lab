@@ -113,10 +113,14 @@ def write_site(builder: SiteBuilder, payload: Mapping[str, Any], log=print) -> N
         [player_tile(v) for v in sorted(club_players.values(), key=lambda p: -(p.get("min") or 0))],
     )
 
-    for key, entry in club_players.items():
+    # profile piszemy dla calej ligi - inaczej kafel rywala nie mialby dokad prowadzic
+    shots_by_player: dict[str, list[dict[str, Any]]] = {}
+    for shot in s.shots:
+        shots_by_player.setdefault(shot["player"], []).append(shot)
+    for key, entry in players.items():
         _write(
             out / "player" / (slug(key) + ".json"),
-            {**entry, "shots": [sh for sh in s.shots if sh["player"] == key]},
+            {**entry, "shots": shots_by_player.get(key, [])},
         )
 
     # wysylamy komplet piatek - prog posiadan ustawia sie w interfejsie
@@ -132,6 +136,20 @@ def write_site(builder: SiteBuilder, payload: Mapping[str, Any], log=print) -> N
 
     _write(out / "pairs.json", [{k: v for k, v in p.items() if k != "games"} for p in club_pairs])
 
+    # cala liga - podglad najlepszych zawodnikow i piatek rywali
+    _write(
+        out / "league_players.json",
+        [player_tile(v) for v in sorted(players.values(), key=lambda p: -(p.get("min") or 0))],
+    )
+    _write(
+        out / "league_lineups.json",
+        [
+            {k: v for k, v in lineup.items() if k != "games"}
+            for lineup in top_lineups_per_team(payload["lineups"])
+        ],
+    )
+    _write(out / "schedule.json", upcoming(s, cfg, builder.schedule, teams))
+
     # pelne play-by-play meczow klubu - podstawa przegladu przebiegu meczu
     club_matches = [g["match_id"] for g in s.games if club in (g["home"], g["away"])]
     for match_id in club_matches:
@@ -141,6 +159,73 @@ def write_site(builder: SiteBuilder, payload: Mapping[str, Any], log=print) -> N
     _write(out / "shots.json", [sh for sh in s.shots if sh["team"] == club])
     _write(out / "glossary.json", {"metrics": GLOSSARY, "zones": ZONE_GLOSSARY})
     log("zapisano dane portalu do {}".format(out))
+
+
+def top_lineups_per_team(lineups, limit: int = 12) -> list[dict[str, Any]]:
+    """Najczesciej grajace piatki kazdej druzyny - podstawa skautingu."""
+    by_team: dict[str, list[dict[str, Any]]] = {}
+    for lineup in lineups:
+        if lineup.get("size") != 5:
+            continue
+        by_team.setdefault(lineup["team"], []).append(lineup)
+    out: list[dict[str, Any]] = []
+    for rows in by_team.values():
+        rows.sort(key=lambda r: -((r.get("off_poss") or 0) + (r.get("def_poss") or 0)))
+        out.extend(rows[:limit])
+    return out
+
+
+def upcoming(season: Season, cfg: BuildConfig, schedule, teams) -> dict[str, Any]:
+    """Terminarz klubu z zaznaczonym najblizszym nierozegranym meczem."""
+    club_tokens = _tokens(cfg.club) | _tokens(cfg.club_display)
+    played = {g["match_id"] for g in season.games}
+    rows: list[dict[str, Any]] = []
+
+    for game in schedule or []:
+        home_tokens = _tokens(game.get("home", ""))
+        away_tokens = _tokens(game.get("away", ""))
+        if not (home_tokens & club_tokens or away_tokens & club_tokens):
+            continue
+        at_home = bool(home_tokens & club_tokens)
+        opponent = game.get("away") if at_home else game.get("home")
+        rows.append(
+            {
+                "date": game.get("date"),
+                "tipoff": game.get("tipoff"),
+                "round": game.get("round"),
+                "home": at_home,
+                "opponent": opponent,
+                "opponent_key": _match_team(opponent, teams),
+                "venue": game.get("venue"),
+                "city": game.get("city"),
+                "finished": bool(game.get("finished")),
+                "score": [game.get("home_score"), game.get("away_score")],
+            }
+        )
+
+    # czesc terminow nie ma jeszcze daty, wiec kolejnosc opiera sie na numerze
+    # kolejki - data rozstrzyga tylko remisy w obrebie tej samej kolejki
+    rows.sort(key=lambda r: (r.get("round") or 999, r.get("date") or "9999"))
+    nxt = next((r for r in rows if not r["finished"]), None)
+    return {"games": rows, "next": nxt, "played": sum(1 for r in rows if r["finished"])}
+
+
+def _tokens(name: str) -> set[str]:
+    from .discover import name_tokens
+
+    return name_tokens(name or "")
+
+
+def _match_team(name: str, teams) -> str | None:
+    """Dopasowuje nazwe z terminarza do klucza druzyny w danych."""
+    wanted = _tokens(name)
+    best, score = None, 0.0
+    for key, team in teams.items():
+        overlap = len(_tokens(team.get("name", "")) & wanted)
+        ratio = overlap / max(1, min(len(wanted), len(_tokens(team.get("name", "")))))
+        if ratio > score:
+            best, score = key, ratio
+    return best if score >= 0.5 else None
 
 
 def player_tile(entry: Mapping[str, Any]) -> dict[str, Any]:

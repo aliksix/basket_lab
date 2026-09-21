@@ -4,26 +4,32 @@ import {
   dataTable, dateLabel, el, fail, initTooltips, load, metricLabel, mountChrome,
   num, ordinal, percentileRow, pct, rankClass, restoreTheme, signed, statTile,
 } from './core.js';
-import { FILTERS, ZONES14, byDate, mergeZones, percentileOf, rankMap, teamSplit, zoneProfile } from './metrics.js';
+import {
+  FILTERS, TEAM_AXES, ZONES14, axisOf, byDate, mergeZones, percentileOf,
+  rankMap, teamSplit, zoneProfile,
+} from './metrics.js';
 import { divergingBars, formLine, netColor, shotDiet, styleMap } from './charts.js';
 import { shotChart, shotLegend, shotModeSwitch } from './court.js';
 
 restoreTheme();
 
-const state = { filter: 'all', game: '', shots: 'zones' };
+const state = { filter: 'all', game: '', shots: 'zones', axisX: 'tpar', axisY: 'pace' };
 let shots;
 let meta;
 let league;
 let leagueGames;
 let clubRows;
 let teamRows;
+let schedule;
 
 init().catch((error) => fail(document.getElementById('content'), error));
 
 async function init() {
   await initTooltips();
   meta = await mountChrome('home');
-  [league, leagueGames, shots] = await Promise.all([load('league'), load('league_games'), load('shots')]);
+  [league, leagueGames, shots, schedule] = await Promise.all([
+    load('league'), load('league_games'), load('shots'), load('schedule'),
+  ]);
 
   teamRows = new Map();
   for (const row of byDate(leagueGames)) {
@@ -141,6 +147,7 @@ function render() {
   });
 
   content.replaceChildren(
+    nextOpponentCard(),
     section('Efektywność', el('div', { class: 'grid grid--4' },
       tile('ortg', (s) => s.ortg),
       tile('drtg', (s) => s.drtg, { higher: false }),
@@ -155,6 +162,29 @@ function render() {
     leagueSection(splits, total),
     styleSection(splits),
   );
+}
+
+/** Skrot do skautingu najblizszego rywala. */
+function nextOpponentCard() {
+  const next = schedule?.next;
+  if (!next) return el('div');
+  const team = league.teams.find((t) => t.key === next.opponent_key);
+  return el('a', {
+    class: 'card next-opp',
+    href: next.opponent_key ? `scout.html?t=${encodeURIComponent(next.opponent_key)}` : 'scout.html',
+  },
+    team?.logo ? el('img', { src: team.logo, alt: '' }) : null,
+    el('div', {},
+      el('div', { class: 'eyebrow' }, 'Najbliższy mecz'),
+      el('div', { class: 'next-opp__name' },
+        `${next.home ? 'vs' : '@'} ${next.opponent}`),
+      el('div', { class: 'card__sub' },
+        [next.date ? dateLabel(next.date) : null,
+          next.round ? `kolejka ${next.round}` : null,
+          next.venue || null].filter(Boolean).join(' · '))),
+    el('div', { class: 'next-opp__stats' },
+      team ? el('span', {}, 'AdjNET ', el('b', {}, signed(team.adj_net, 1))) : null,
+      el('span', { class: 'chip chip--brand' }, 'Zobacz skauting →')));
 }
 
 function section(title, ...nodes) {
@@ -321,24 +351,42 @@ function leagueSection(splits, total) {
 
 /* --- mapa stylu ------------------------------------------------------------ */
 function styleSection(splits) {
+  const x = axisOf(state.axisX);
+  const y = axisOf(state.axisY);
   const points = Object.entries(splits).map(([key, split]) => {
     const team = league.teams.find((t) => t.key === key) || {};
     return {
       key,
       name: team.name || key,
       short: team.short,
-      x: split.tpar,
-      y: split.pace,
+      x: x.get(split),
+      y: y.get(split),
       value: split.net,
       color: netColor(split.net),
-      tip: `${num(split.pace, 1)} posiadań na 40 min · ${num(split.tpar, 1)}% rzutów za 3`
+      tip: `${x.label}: ${num(x.get(split), 1)} · ${y.label}: ${num(y.get(split), 1)}`
         + `<em>bilans ${signed(split.net, 1)} na 100 posiadań</em>`,
     };
   });
+
   return section('Mapa stylu',
     el('div', { class: 'card' },
       el('div', { class: 'card__head' },
-        el('h2', {}, 'Tempo a rozkład rzutów'),
-        el('span', { class: 'card__sub' }, 'kolor punktu = bilans na 100 posiadań · przerywane linie = średnia ligi')),
-      styleMap(points, { highlight: meta.club.key })));
+        el('h2', {}, 'Porównanie zespołów'),
+        axisPicker((axis, value) => { state[axis] = value; render(); })),
+      styleMap(points, { highlight: meta.club.key, xLabel: x.label, yLabel: y.label }),
+      el('div', { class: 'legend' },
+        el('span', { class: 'muted' }, 'kolor punktu = bilans na 100 posiadań · przerywane linie = średnia ligi'))));
+}
+
+/** Dwa selecty wybierajace wskazniki na osie mapy stylu. */
+function axisPicker(onChange) {
+  const make = (value, axis) => {
+    const select = el('select', { onchange: (e) => onChange(axis, e.target.value) },
+      TEAM_AXES.map((a) => el('option', { value: a.key }, a.label)));
+    select.value = value;
+    return select;
+  };
+  return el('div', { class: 'axis-picker' },
+    el('span', {}, 'oś X'), make(state.axisX, 'axisX'),
+    el('span', {}, 'oś Y'), make(state.axisY, 'axisY'));
 }

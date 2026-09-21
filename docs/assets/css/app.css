@@ -261,15 +261,22 @@ table.data .is-club td:first-child { color: var(--brand); }
   width: 100%; height: 100%; object-fit: cover; display: block;
 }
 .avatar--lg { width: 92px; height: 92px; }
+.avatar__initials {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-style: normal; font-weight: 700; font-size: .78rem; color: var(--ink-muted);
+  letter-spacing: .02em;
+}
+.avatars .avatar__initials { font-size: .62rem; }
 
 /* prostokatny portret - karty zawodnikow i naglowek profilu */
 .portrait {
-  width: 66px; height: 82px; border-radius: 11px; flex: none; overflow: hidden;
+  /* proporcje 158 x 190 - kadr jest wypalony w pliku, wiec bez przesuwania */
+  width: 66px; height: 79px; border-radius: 11px; flex: none; overflow: hidden;
   background: var(--surface-3); border: 1px solid var(--border);
   display: inline-block; position: relative;
 }
-.portrait img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; display: block; }
-.portrait--lg { width: 104px; height: 128px; border-radius: 14px; }
+.portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.portrait--lg { width: 105px; height: 126px; border-radius: 14px; }
 .ptile__name { font-weight: 650; font-size: .97rem; letter-spacing: -.012em; }
 .ptile__meta { color: var(--ink-muted); font-size: .75rem; margin-top: 3px; }
 .ptile__impact { display: flex; align-items: baseline; gap: 8px; padding: 0 16px 8px; }
@@ -368,6 +375,14 @@ table.data .is-club td:first-child { color: var(--brand); }
   background: linear-gradient(90deg, var(--zone-bad), var(--zone-warn), var(--zone-empty), var(--zone-ok), var(--zone-good));
 }
 .legend__scale { gap: 8px; }
+
+/* wybor wskaznikow na osie mapy stylu */
+.axis-picker { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.axis-picker span { font-size: .7rem; color: var(--ink-muted); font-weight: 650; letter-spacing: .06em; }
+.axis-picker select {
+  background: var(--surface-3); border: 1px solid var(--border); color: var(--ink);
+  border-radius: 8px; padding: 4px 8px; font-family: inherit; font-size: .78rem;
+}
 
 /* --- rozne ----------------------------------------------------------------- */
 .chips { display: flex; gap: 6px; flex-wrap: wrap; }

@@ -217,7 +217,8 @@ function teamCode(team) {
  * Podpisy szukaja wolnego miejsca wokol punktu; jesli zadne nie jest wolne,
  * zostaje sam punkt z dymkiem - lepiej pominac etykiete niz zlepic dwie.
  */
-export function styleMap(teams, { highlight = null, width = 660, height = 460 } = {}) {
+export function styleMap(teams, { highlight = null, width = 660, height = 460,
+                                  xLabel = '', yLabel = '' } = {}) {
   const pad = { l: 54, r: 26, t: 30, b: 46 };
   const points = teams.filter((t) => Number.isFinite(t.x) && Number.isFinite(t.y));
   if (!points.length) return el('div', { class: 'empty' }, 'Brak danych');
@@ -255,21 +256,19 @@ export function styleMap(teams, { highlight = null, width = 660, height = 460 } 
     svg.append(svgEl('line', { x1, y1, x2, y2, stroke: 'var(--border)', 'stroke-dasharray': '4 4' }));
   }
 
-  // opisy cwiartek i osi
-  svg.append(text(width / 2, height - 6, 'udział rzutów za 3 (%)', 'middle', 'var(--ink-dim)', 11));
+  // podpisy osi i cwiartek - zalezne od wybranych wskaznikow
+  svg.append(text(width / 2, height - 6, xLabel, 'middle', 'var(--ink-dim)', 11));
   const axisY = svgEl('text', {
     x: 14, y: height / 2, 'font-size': 11, fill: 'var(--ink-dim)', 'text-anchor': 'middle',
     transform: `rotate(-90 14 ${height / 2})`,
   });
-  axisY.textContent = 'tempo (posiadania na 40 min)';
+  axisY.textContent = yLabel;
   svg.append(axisY);
   for (const [label, x, y, anchor] of [
-    ['szybko + gra pod koszem', pad.l + 4, pad.t + 13, 'start'],
-    ['szybko + gra za 3', width - pad.r - 4, pad.t + 13, 'end'],
-    ['wolno + gra pod koszem', pad.l + 4, height - pad.b - 7, 'start'],
-    ['wolno + gra za 3', width - pad.r - 4, height - pad.b - 7, 'end'],
+    [`wyżej ${yLabel}`, pad.l + 4, pad.t + 13, 'start'],
+    [`wyżej ${xLabel}`, width - pad.r - 4, height - pad.b - 7, 'end'],
   ]) {
-    svg.append(text(x, y, label, anchor, 'var(--ink-muted)', 9.5, .75));
+    if (label.trim()) svg.append(text(x, y, label, anchor, 'var(--ink-muted)', 9.5, .7));
   }
 
   // punkty: najpierw klub, potem druzyny o najwiekszym bilansie - one dostaja

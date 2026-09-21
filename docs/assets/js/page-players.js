@@ -9,7 +9,7 @@ import { pizza, ratingLine } from './charts.js';
 
 restoreTheme();
 
-const state = { sort: 'impact', view: 'tiles', search: '' };
+const state = { sort: 'impact', view: 'tiles', search: '', team: '' };
 let meta;
 let players;
 
@@ -18,7 +18,8 @@ init().catch((error) => fail(document.getElementById('content'), error));
 async function init() {
   await initTooltips();
   meta = await mountChrome('players');
-  players = await load('players');
+  players = await load('league_players');
+  state.team = meta.club.key;
   renderFilters();
   render();
 }
@@ -40,13 +41,22 @@ function renderFilters() {
     el('button', { class: state.view === 'tiles' ? 'is-on' : '', onclick: () => { state.view = 'tiles'; renderFilters(); render(); } }, 'Kafle'),
     el('button', { class: state.view === 'table' ? 'is-on' : '', onclick: () => { state.view = 'table'; renderFilters(); render(); } }, 'Tabela'));
 
-  bar.replaceChildren(seg, sortSelect,
+  const teamSelect = el('select', {
+    onchange: (e) => { state.team = e.target.value; render(); },
+  },
+    el('option', { value: meta.club.key }, meta.club.name),
+    el('option', { value: '' }, 'Cała liga'),
+    ...meta.teams.filter((t) => t.key !== meta.club.key)
+      .map((t) => el('option', { value: t.key }, t.name)));
+  teamSelect.value = state.team;
+
+  bar.replaceChildren(seg, teamSelect, sortSelect,
     el('input', {
       type: 'search', placeholder: 'Szukaj zawodnika…', value: state.search,
       oninput: (e) => { state.search = e.target.value; render(); },
     }),
     el('div', { class: 'filters__note' },
-      'Percentyle liczone wśród zawodników ligi z min. 120 minutami'));
+      'Percentyle i miejsca liczone wśród zawodników całej ligi'));
 }
 
 function sortValue(player) {
@@ -63,8 +73,14 @@ function sortValue(player) {
 function visible() {
   const needle = state.search.trim().toLowerCase();
   return players
+    .filter((p) => !state.team || p.team === state.team)
     .filter((p) => !needle || (p.name || '').toLowerCase().includes(needle))
     .sort((a, b) => sortValue(b) - sortValue(a));
+}
+
+function teamName(key) {
+  const team = meta.teams.find((t) => t.key === key);
+  return team?.short || team?.name || key;
 }
 
 function render() {
@@ -89,7 +105,8 @@ function tile(player) {
         el('div', { class: 'ptile__name' }, player.name),
         el('div', { class: 'ptile__meta' },
           `#${player.shirt || '–'} · ${player.position || '–'} · `
-          + `${num((player.min || 0) / Math.max(player.gp, 1), 1)} min`))),
+          + `${num((player.min || 0) / Math.max(player.gp, 1), 1)} min`
+          + (state.team ? '' : ' · ' + teamName(player.team))))),
 
     el('div', { class: 'ptile__epm', 'data-metric': 'impact' },
       el('small', {}, 'IMPACT'),
@@ -132,6 +149,7 @@ function tinted(node, percentile) {
 function table(list) {
   const columns = [
     { key: 'name', label: 'Zawodnik', render: (p) => el('a', { href: `player.html?p=${encodeURIComponent(p.key)}`, style: 'color:var(--brand)' }, p.name) },
+    { key: 'team', label: 'Drużyna', sortValue: (p) => teamName(p.team), render: (p) => teamName(p.team) },
     { key: 'pos', label: 'Poz', sortValue: (p) => p.position || '', render: (p) => p.position || '–' },
     { key: 'gp', label: 'M', render: (p) => p.gp },
     { key: 'min', label: 'MIN', sortValue: (p) => p.min, render: (p) => num(p.min / Math.max(p.gp, 1), 1) },

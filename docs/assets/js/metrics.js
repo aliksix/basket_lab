@@ -230,6 +230,33 @@ export function pppOnCourt(player) {
   return rating === null || rating === undefined ? null : rating / 100;
 }
 
+/* --- osie wykresu porownawczego ------------------------------------------- */
+/**
+ * Wskazniki, ktore mozna wybrac na osie mapy stylu. `higher` decyduje tylko
+ * o kolorze i kierunku rankingu; wykres i tak rysuje wartosci wprost.
+ */
+export const TEAM_AXES = [
+  { key: 'ortg', label: 'OFF RTG', get: (s) => s.ortg, higher: true },
+  { key: 'drtg', label: 'DEF RTG', get: (s) => s.drtg, higher: false },
+  { key: 'net', label: 'NET RTG', get: (s) => s.net, higher: true },
+  { key: 'pace', label: 'Tempo', get: (s) => s.pace, higher: true },
+  { key: 'efg', label: 'eFG%', get: (s) => s.efg, higher: true },
+  { key: 'opp_efg', label: 'eFG% rywali', get: (s) => s.opp_efg, higher: false },
+  { key: 'ts', label: 'TS%', get: (s) => s.ts, higher: true },
+  { key: 'tov_rate', label: 'TOV%', get: (s) => s.tov_rate, higher: false },
+  { key: 'opp_tov_rate', label: 'Wymuszone straty', get: (s) => s.opp_tov_rate, higher: true },
+  { key: 'orb_rate', label: 'ORB%', get: (s) => s.orb_rate, higher: true },
+  { key: 'drb_rate', label: 'DRB%', get: (s) => s.drb_rate, higher: true },
+  { key: 'ft_rate', label: 'FTr', get: (s) => s.ft_rate, higher: true },
+  { key: 'opp_ft_rate', label: 'FTr rywali', get: (s) => s.opp_ft_rate, higher: false },
+  { key: 'tpar', label: 'Udział rzutów za 3', get: (s) => s.tpar, higher: true },
+  { key: 'morey', label: 'Morey Score', get: (s) => s.morey, higher: true },
+  { key: 'ast_rate', label: 'AST%', get: (s) => s.ast_rate, higher: true },
+  { key: 'kill_shots', label: 'Kill shots', get: (s) => s.kill_shots, higher: true },
+];
+
+export const axisOf = (key) => TEAM_AXES.find((a) => a.key === key) || TEAM_AXES[0];
+
 /* --- rankingi -------------------------------------------------------------- */
 /** Miejsce kazdej druzyny wedlug wskaznika (1 = najlepsze). */
 export function rankMap(values, higherIsBetter = true) {

@@ -250,6 +250,7 @@ const NAV = [
   ['players.html', 'players', 'Zawodnicy', 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 20a8 8 0 0 1 16 0'],
   ['lineups.html', 'lineups', 'Piątki', 'M4 6h7v5H4zM13 6h7v5h-7zM4 13h7v5H4zM13 13h7v5h-7z'],
   ['games.html', 'games', 'Mecze', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18ZM3 12h18M12 3c3 4 3 14 0 18M12 3c-3 4-3 14 0 18'],
+  ['scout.html', 'scout', 'Skauting', 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14ZM16 16l5 5'],
   ['league.html', 'league', 'Liga', 'M4 19V9m5 10V5m5 14v-7m5 7V8'],
 ];
 
@@ -322,7 +323,15 @@ export function avatar(player, extra = '') {
   const frame = el('span', { class: ('avatar ' + extra).trim(), title: player?.name || '' });
   const src = player?.icon || player?.photo;
   if (src) frame.append(el('img', { src, alt: player.name || '', loading: 'lazy' }));
+  else frame.append(el('i', { class: 'avatar__initials' }, initials(player?.name)));
   return frame;
+}
+
+/** Inicjaly zamiast zdjecia - zawodnicy rywali nie maja wycietych portretow. */
+export function initials(name) {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '?';
+  return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
 }
 
 /** Prostokatny portret zawodnika - na kartach i w naglowku profilu. */

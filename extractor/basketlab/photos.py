@@ -28,8 +28,18 @@ from .pzkosz import DEFAULT_BASE
 #: rozmiar, w jakim pobieramy oryginal (wiekszy zwraca 404)
 SOURCE_SIZE = "600-600"
 
-#: szerokosc prostokatnego portretu uzywanego na kartach zawodnikow
-OUTPUT_SIZE = 320
+#: prostokatny portret na karty zawodnikow - proporcje 158 x 190,
+#: zapisywane w podwojnej rozdzielczosci pod ekrany o duzej gestosci
+PORTRAIT_SIZE = (316, 380)
+
+#: ile wysokosci glowy ma miescic kadr portretu
+PORTRAIT_HEADS = 1.75
+
+#: margines nad glowa jako ulamek wysokosci kadru
+PORTRAIT_HEADROOM = 0.09
+
+#: zachowane dla zgodnosci z wywolaniami podajacymi pojedynczy rozmiar
+OUTPUT_SIZE = PORTRAIT_SIZE[0]
 
 #: bok kwadratowej ikony uzywanej w kolach (tabele, piatki, duety)
 ICON_SIZE = 192
@@ -199,17 +209,30 @@ def head_icon(img, size: int = ICON_SIZE, zoom: float = ICON_ZOOM):
     return out.resize((size, size), Image.LANCZOS)
 
 
-def portrait(img, width: int = OUTPUT_SIZE):
-    """Prostokatny portret w proporcjach zrodla - do kart zawodnikow."""
+def portrait(img, size: tuple[int, int] = PORTRAIT_SIZE,
+             heads: float = PORTRAIT_HEADS, headroom: float = PORTRAIT_HEADROOM):
+    """Prostokatny portret zakotwiczony na glowie, w proporcjach 158 x 190.
+
+    Wysokosc kadru liczymy w wysokosciach glowy, a nie w pikselach zrodla -
+    dzieki temu wszyscy zawodnicy maja te sama skale twarzy niezaleznie od
+    tego, jak ciasno ustawiono aparat na sesji.
+    """
     Image, _ = _pillow()
-    bbox = img.split()[-1].getbbox()
-    if bbox:
-        margin = max(4, (bbox[2] - bbox[0]) // 40)
-        left = max(0, bbox[0] - margin)
-        right = min(img.width, bbox[2] + margin)
-        img = img.crop((left, 0, right, img.height))
-    height = round(width * img.height / img.width)
-    return img.resize((width, height), Image.LANCZOS)
+    box = head_box(img.split()[-1])
+    if not box:
+        return img.resize(size, Image.LANCZOS)
+
+    left, top, right, bottom = box
+    head_height = bottom - top
+    frame_h = int(head_height * heads)
+    frame_w = int(frame_h * size[0] / size[1])
+    center_x = (left + right) // 2
+    y0 = int(top - frame_h * headroom)
+
+    out = Image.new("RGBA", (frame_w, frame_h), (0, 0, 0, 0))
+    out.paste(img.crop((center_x - frame_w // 2, y0,
+                        center_x - frame_w // 2 + frame_w, y0 + frame_h)), (0, 0))
+    return out.resize(size, Image.LANCZOS)
 
 
 def _encode(img) -> bytes:
@@ -220,14 +243,15 @@ def _encode(img) -> bytes:
     return buffer.getvalue()
 
 
-def cut_out(data: bytes, width: int = OUTPUT_SIZE, icon: int = ICON_SIZE) -> tuple[bytes, bytes]:
+def cut_out(data: bytes, width: int | None = None, icon: int = ICON_SIZE) -> tuple[bytes, bytes]:
     """Z pobranego JPEG-a robi portret i ikone, obie z przezroczystym tlem."""
     import io
 
     Image, _ = _pillow()
     img = Image.open(io.BytesIO(data)).convert("RGBA")
     img.putalpha(background_alpha(img))
-    return _encode(portrait(img, width)), _encode(head_icon(img, icon))
+    size = PORTRAIT_SIZE if width is None else (width, round(width * PORTRAIT_SIZE[1] / PORTRAIT_SIZE[0]))
+    return _encode(portrait(img, size)), _encode(head_icon(img, icon))
 
 
 # --- calosc -------------------------------------------------------------------

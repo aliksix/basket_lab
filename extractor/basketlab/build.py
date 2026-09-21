@@ -224,6 +224,8 @@ class SiteBuilder:
         self.registry = Registry.load(config.registry_path)
         self.club_key: str = ""
         self.assets: dict[str, str] = {}
+        #: terminarz z PZKosz - potrzebny do wskazania najblizszego rywala
+        self.schedule: list[dict[str, Any]] = []
 
     # -- wczytanie meczow ----------------------------------------------------
     def load(self, log=print) -> None:

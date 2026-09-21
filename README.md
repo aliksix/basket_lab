@@ -154,7 +154,7 @@ https://s1.static.esor.pzkosz.pl/internalfiles/image/zawodnicy
 
 | Plik | Format | Gdzie |
 | --- | --- | --- |
-| `<klucz>.webp` | 320 × ~420, prostokąt | karty zawodników, nagłówek profilu |
+| `<klucz>.webp` | 316 × 380 (proporcje 158 × 190) | karty zawodników, nagłówek profilu |
 | `<klucz>-icon.webp` | 192 × 192, ciasno na głowę | koła w tabelach, przy piątkach i duetach |
 
 Tło usuwa **wypełnienie od krawędzi kadru**, a nie próg koloru — próg zjadłby
@@ -162,6 +162,9 @@ białe wykończenie koszulki i jasne logo, bo mają zbliżoną jasność do tła
 Linię ramion wykrywa skok szerokości kolejnych wierszy maski, dzięki czemu kadr
 ikony trafia w głowę bez rozpoznawania twarzy.
 
+Wysokość kadru liczona jest **w wysokościach głowy** (1.75 dla portretu, 1.25
+dla ikony), a nie w pikselach źródła — dzięki temu wszyscy zawodnicy mają tę
+samą skalę twarzy niezależnie od tego, jak ciasno ustawiono aparat na sesji.
 Kadr jest wypalony w pliku, więc portal nie skaluje ani nie przesuwa niczego
 w CSS — wystarczy `object-fit: cover`. Identyfikatory sezonu, klubu i zawodnika
 czytane są ze strony zawodnika, więc nic nie jest zaszyte w kodzie.
@@ -210,6 +213,7 @@ błękit `#3A5BD9`). Motyw jasny i ciemny przełącznikiem w prawym górnym rogu
 | `lineups.html` | piątki z miniaturami zdjęć, tabela piątek, tabela duetów z synergią |
 | `lineup.html?l=…` | piątka: Four Factors, mecz po meczu, pojedynki z piątkami rywali |
 | `league.html` | cała liga: ratingi, Four Factors, profil rzutowy, mapa stylu |
+| `scout.html?t=…` | skauting rywala: profil gry, mocne i słabe strony, kluczowi zawodnicy, najczęstsze piątki |
 
 Każda metryka ma znak `?` z wyjaśnieniem po polsku (`docs/data/glossary.json`,
 źródło: `extractor/basketlab/glossary.py`).
@@ -262,6 +266,30 @@ Dwa różne PPP, celowo pokazywane obok siebie:
 
 Pierwsze mówi o jego własnej efektywności, drugie o tym, jak radzi sobie cały
 atak przy nim — to nie to samo i rozjazd między nimi bywa najciekawszy.
+
+### Rywale i skauting
+
+Dane obejmują **całą ligę**, nie tylko klub:
+
+- `players.html` i `lineups.html` mają wybór drużyny — można podejrzeć kadrę
+  i piątki dowolnego rywala (dla rywali zbieramy tylko najczęściej grające
+  piątki, duety liczymy wyłącznie dla własnej drużyny),
+- profil zawodnika (`player.html`) istnieje dla każdego gracza w bazie,
+- `scout.html` otwiera domyślnie **najbliższego rywala z terminarza** i składa
+  jego profil: ratingi z miejscami w lidze, Four Factors po obu stronach,
+  mapa stref, kluczowi zawodnicy i najczęstsze piątki.
+
+Sekcja „Analiza gry" wylicza mocne i słabe strony z miejsc drużyny w tabelach
+ligowych: trzy najwyższe pozycje trafiają do „na co uważać", trzy najniższe do
+„gdzie szukać przewagi". Cechy opisujące wyłącznie styl (tempo, udział trójek)
+są oznaczone osobno — wysokie tempo nie jest ani zaletą, ani wadą.
+
+### Mapa stylu
+
+Wykres porównujący zespoły ma **wybór wskaźnika na każdą oś** (OFF/DEF RTG,
+Four Factors, Morey Score, tempo, udział trójek i inne). Kolor punktu to zawsze
+bilans na 100 posiadań, przerywane linie pokazują średnią ligi, a podpisy
+drużyn omijają się nawzajem — przy kolizji znika etykieta, nie punkt.
 
 ### Filtry
 

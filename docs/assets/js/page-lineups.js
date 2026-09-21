@@ -7,17 +7,22 @@ import { clutchRatings, fgaLongRate, pppLong } from './metrics.js';
 
 restoreTheme();
 
-const state = { minPoss: 0, sort: 'poss', view: 'cards', clutch: false };
+const state = { minPoss: 0, sort: 'poss', view: 'cards', clutch: false, team: '' };
+let meta;
 let players;
 let lineups;
 let pairs;
+let leagueLineups;
 
 init().catch((error) => fail(document.getElementById('content'), error));
 
 async function init() {
   await initTooltips();
-  await mountChrome('lineups');
-  [players, lineups, pairs] = await Promise.all([load('players'), load('lineups'), load('pairs')]);
+  meta = await mountChrome('lineups');
+  [players, lineups, pairs, leagueLineups] = await Promise.all([
+    load('league_players'), load('lineups'), load('pairs'), load('league_lineups'),
+  ]);
+  state.team = meta.club.key;
   renderFilters();
   render();
 }
@@ -42,6 +47,12 @@ export function shortName(name) {
 
 function poss(lineup) {
   return (lineup.off_poss || 0) + (lineup.def_poss || 0);
+}
+
+/** Dla klubu mamy komplet piatek, dla rywali tylko te najczesciej grajace. */
+function source() {
+  if (state.team === meta.club.key) return lineups;
+  return leagueLineups.filter((l) => l.team === state.team);
 }
 
 /** Piatka sprowadzona do wybranego trybu: caly mecz albo same koncowki. */
@@ -85,11 +96,21 @@ function renderFilters() {
     el('option', { value: 'drtg' }, 'Sortuj: obrona'));
   sort.value = state.sort;
 
-  bar.replaceChildren(seg, clutch, min, sort,
+  const teamSelect = el('select', {
+    onchange: (e) => { state.team = e.target.value; renderFilters(); render(); },
+  },
+    el('option', { value: meta.club.key }, meta.club.name),
+    ...meta.teams.filter((t) => t.key !== meta.club.key)
+      .map((t) => el('option', { value: t.key }, t.name)));
+  teamSelect.value = state.team;
+
+  bar.replaceChildren(seg, teamSelect, clutch, min, sort,
     el('div', { class: 'filters__note' },
       state.clutch
         ? 'Końcówki: ostatnie 5 minut IV kwarty i dogrywki przy różnicy do 5 punktów'
-        : `${lineups.length} piątek w bazie · ratingi są bardzo wrażliwe na próbę, patrz na liczbę posiadań`));
+        : state.team === meta.club.key
+          ? `${lineups.length} piątek w bazie · ratingi są bardzo wrażliwe na próbę, patrz na liczbę posiadań`
+          : 'Dla rywali pokazujemy tylko najczęściej grające piątki'));
 }
 
 function sorted(list) {
@@ -104,10 +125,12 @@ function sorted(list) {
 function render() {
   const content = document.getElementById('content');
   if (state.view === 'pairs') {
-    content.replaceChildren(pairsView());
+    content.replaceChildren(state.team === meta.club.key
+      ? pairsView()
+      : el('div', { class: 'card empty' }, 'Duety liczymy tylko dla własnej drużyny.'));
     return;
   }
-  const list = sorted(lineups.map(view).filter((l) => poss(l) >= Math.max(state.minPoss, state.clutch ? 1 : 0)));
+  const list = sorted(source().map(view).filter((l) => poss(l) >= Math.max(state.minPoss, state.clutch ? 1 : 0)));
   if (!list.length) {
     content.replaceChildren(el('div', { class: 'card empty' },
       state.clutch

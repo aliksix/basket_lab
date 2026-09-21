@@ -3,12 +3,12 @@
 import {
   dataTable, el, fail, initTooltips, load, mountChrome, num, restoreTheme, signed,
 } from './core.js';
-import { FILTERS, byDate, teamSplit } from './metrics.js';
+import { FILTERS, TEAM_AXES, axisOf, byDate, teamSplit } from './metrics.js';
 import { netColor, shotDiet, styleMap } from './charts.js';
 
 restoreTheme();
 
-const state = { filter: 'all', tab: 'ratings' };
+const state = { filter: 'all', tab: 'ratings', axisX: 'tpar', axisY: 'pace' };
 let meta;
 let league;
 let teamRows;
@@ -64,18 +64,40 @@ function render() {
   };
   content.replaceChildren(
     el('div', { class: 'card' }, tables[state.tab]),
-    el('div', { class: 'section' },
-      el('div', { class: 'card' },
-        el('div', { class: 'card__head' }, el('h2', {}, 'Mapa stylu'),
-          el('span', { class: 'card__sub' }, 'kolor punktu = bilans na 100 posiadań · przerywane linie = średnia ligi')),
-        styleMap(rows.map((r) => ({
-          key: r.key, name: r.name, short: r.short,
-          x: r.split.tpar, y: r.split.pace,
-          value: r.split.net, color: netColor(r.split.net),
-          tip: `${num(r.split.pace, 1)} posiadań na 40 min · ${num(r.split.tpar, 1)}% rzutów za 3`
-            + `<em>bilans ${signed(r.split.net, 1)} na 100 posiadań</em>`,
-        })), { highlight: meta.club.key }))),
+    styleSection(rows),
   );
+}
+
+function styleSection(rows) {
+  const x = axisOf(state.axisX);
+  const y = axisOf(state.axisY);
+  return el('div', { class: 'section' },
+    el('div', { class: 'card' },
+      el('div', { class: 'card__head' },
+        el('h2', {}, 'Mapa stylu'),
+        axisPicker((axis, value) => { state[axis] = value; render(); })),
+      styleMap(rows.map((r) => ({
+        key: r.key, name: r.name, short: r.short,
+        x: x.get(r.split), y: y.get(r.split),
+        value: r.split.net, color: netColor(r.split.net),
+        tip: `${x.label}: ${num(x.get(r.split), 1)} · ${y.label}: ${num(y.get(r.split), 1)}`
+          + `<em>bilans ${signed(r.split.net, 1)} na 100 posiadań</em>`,
+      })), { highlight: meta.club.key, xLabel: x.label, yLabel: y.label }),
+      el('div', { class: 'legend' },
+        el('span', { class: 'muted' }, 'kolor punktu = bilans na 100 posiadań · przerywane linie = średnia ligi'))));
+}
+
+/** Dwa selecty wybierajace wskazniki na osie mapy stylu. */
+function axisPicker(onChange) {
+  const make = (value, axis) => {
+    const select = el('select', { onchange: (e) => onChange(axis, e.target.value) },
+      TEAM_AXES.map((a) => el('option', { value: a.key }, a.label)));
+    select.value = value;
+    return select;
+  };
+  return el('div', { class: 'axis-picker' },
+    el('span', {}, 'oś X'), make(state.axisX, 'axisX'),
+    el('span', {}, 'oś Y'), make(state.axisY, 'axisY'));
 }
 
 const nameCol = { key: 'name', label: 'Drużyna', render: (r) => el('span', {}, r.name) };

@@ -215,6 +215,14 @@ def cmd_build(args, cfg) -> None:
         limit=args.limit,
     )
     builder = SiteBuilder(config)
+    try:
+        builder.schedule = pzkosz.fetch_schedule(
+            _fetcher(cfg, args),
+            cfg.get("pzkosz_base", pzkosz.DEFAULT_BASE),
+            archive_id=cfg.get("archive_id"),
+        )
+    except Exception as exc:  # pragma: no cover - siec
+        print("nie udalo sie pobrac terminarza: {}".format(exc))
     builder.load()
     payload = builder.build()
     write_site(builder, payload)
