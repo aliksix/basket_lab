@@ -314,16 +314,20 @@ function lineupsSection() {
       el('div', { class: 'card empty' }, 'Brak piątek z wystarczającą liczbą posiadań.'));
   }
   const byKey = new Map(leaguePlayers.map((p) => [p.key, p]));
-  const label = (keys) => keys.map((k) => {
-    const name = byKey.get(k)?.name || k.split(':').pop().replace(/-/g, ' ');
+  const short = (key) => {
+    const name = byKey.get(key)?.name || key.split(':').pop().replace(/-/g, ' ');
     const parts = name.split(/\s+/);
     return parts.length > 1 ? `${parts[0][0]}. ${parts.slice(1).join(' ')}` : name;
-  }).join(' · ');
+  };
+  const label = (keys) => keys.map(short).join(' · ');
+  /** Miniatura z nazwiskiem - samo zdjecie nie mowi, kto gra w tej piatce. */
+  const chips = (keys) => el('div', { class: 'lchips' }, keys.map((k) => el('span', { class: 'lchip' },
+    avatar(byKey.get(k), 'avatar--tiny'),
+    el('span', {}, short(k)))));
 
   const columns = [
     { key: 'players', label: 'Piątka', sortValue: (r) => label(r.players),
-      render: (r) => el('div', { class: 'avatars', title: label(r.players) },
-        r.players.map((k) => avatar(byKey.get(k), 'avatar--tiny'))) },
+      render: (r) => chips(r.players) },
     { key: 'min', label: 'Min razem', metric: 'min_together' },
     { key: 'poss', label: 'POS', metric: 'poss',
       sortValue: (r) => (r.off_poss || 0) + (r.def_poss || 0),
