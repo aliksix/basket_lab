@@ -56,6 +56,12 @@ GLOSSARY: dict[str, dict[str, str]] = {
         "desc": "Liczba posiadań na 40 minut gry.",
         "how": "Wysokie tempo to więcej akcji, a nie automatycznie lepsza gra.",
     },
+    "min_together": {
+        "label": "Min razem",
+        "full": "Minuty wspólnej gry",
+        "desc": "Ile minut ta piątka spędziła na parkiecie w tym samym składzie.",
+        "how": "Kilkanaście minut to jeszcze mała próba — ratingi czytaj z ostrożnością.",
+    },
     "poss": {
         "label": "POSIADANIA",
         "full": "Possessions",

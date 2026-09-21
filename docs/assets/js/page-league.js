@@ -84,7 +84,18 @@ function styleSection(rows) {
           + `<em>bilans ${signed(r.split.net, 1)} na 100 posiadań</em>`,
       })), { highlight: meta.club.key, xLabel: x.label, yLabel: y.label }),
       el('div', { class: 'legend' },
-        el('span', { class: 'muted' }, 'kolor punktu = bilans na 100 posiadań · przerywane linie = średnia ligi'))));
+        el('span', { class: 'legend__item' },
+          el('span', { class: 'legend__dot', style: `background:${netColor(10)}` }),
+          'dodatni bilans'),
+        el('span', { class: 'legend__item' },
+          el('span', { class: 'legend__dot', style: `background:${netColor(-10)}` }),
+          'ujemny bilans'),
+        el('span', { class: 'legend__item' },
+          el('span', { class: 'legend__dot legend__dot--club' }),
+          'nasz zespół'),
+        el('span', { class: 'legend__item' },
+          'kolor = bilans na 100 posiadań (pełna siła przy ±15), niezależnie od osi'),
+        el('span', { class: 'legend__item' }, 'przerywane linie = średnia ligi'))));
 }
 
 /** Dwa selecty wybierajace wskazniki na osie mapy stylu. */

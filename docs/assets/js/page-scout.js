@@ -1,4 +1,4 @@
-/* Skauting rywala: profil gry, mocne i slabe strony, kluczowi zawodnicy, piatki.
+/* Scouting rywala: profil gry, mocne i slabe strony, kluczowi zawodnicy, piatki.
    Domyslnie otwiera najblizszego przeciwnika z terminarza. */
 
 import {
@@ -144,7 +144,7 @@ function renderHead(info, split, rows) {
   const next = schedule.next;
   const isNext = next && next.opponent_key === state.team;
   document.getElementById('head').replaceChildren(
-    el('div', { class: 'eyebrow' }, isNext ? 'Najbliższy rywal' : 'Skauting'),
+    el('div', { class: 'eyebrow' }, isNext ? 'Najbliższy rywal' : 'Scouting'),
     el('div', { style: 'display:flex;gap:14px;align-items:center;flex-wrap:wrap' },
       info.logo ? el('img', { src: info.logo, alt: '', style: 'width:46px;height:46px;object-fit:contain' }) : null,
       el('div', {},
@@ -321,16 +321,19 @@ function lineupsSection() {
   }).join(' · ');
 
   const columns = [
-    { key: 'players', label: 'Piątka', sortValue: (r) => label(r.players), render: (r) => label(r.players) },
-    { key: 'min', label: 'MIN' },
+    { key: 'players', label: 'Piątka', sortValue: (r) => label(r.players),
+      render: (r) => el('div', { class: 'avatars', title: label(r.players) },
+        r.players.map((k) => avatar(byKey.get(k), 'avatar--tiny'))) },
+    { key: 'min', label: 'Min razem', metric: 'min_together' },
     { key: 'poss', label: 'POS', metric: 'poss',
       sortValue: (r) => (r.off_poss || 0) + (r.def_poss || 0),
       render: (r) => num((r.off_poss || 0) + (r.def_poss || 0), 0) },
-    { key: 'ortg', label: 'OFF', metric: 'ortg' },
-    { key: 'drtg', label: 'DEF', metric: 'drtg' },
+    { key: 'ortg', label: 'OFF RTG', metric: 'ortg' },
+    { key: 'drtg', label: 'DEF RTG', metric: 'drtg' },
     { key: 'net', label: 'NET', metric: 'net',
       render: (r) => el('span', { class: (r.net ?? 0) >= 0 ? 'delta--up' : 'delta--down' }, signed(r.net, 1)) },
   ];
-  return section('Najczęstsze piątki', 'dla rywali zbieramy tylko te najczęściej grające',
+  return section('Najczęstsze piątki',
+    'czas wspólnej gry oraz ratingi ataku i obrony przy tej piątce na parkiecie',
     el('div', { class: 'card' }, dataTable(columns, rows, { sort: 'poss', desc: true })));
 }

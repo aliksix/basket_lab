@@ -164,7 +164,7 @@ function render() {
   );
 }
 
-/** Skrot do skautingu najblizszego rywala. */
+/** Skrot do scoutingu najblizszego rywala. */
 function nextOpponentCard() {
   const next = schedule?.next;
   if (!next) return el('div');
@@ -184,7 +184,7 @@ function nextOpponentCard() {
           next.venue || null].filter(Boolean).join(' · '))),
     el('div', { class: 'next-opp__stats' },
       team ? el('span', {}, 'AdjNET ', el('b', {}, signed(team.adj_net, 1))) : null,
-      el('span', { class: 'chip chip--brand' }, 'Zobacz skauting →')));
+      el('span', { class: 'chip chip--brand' }, 'Zobacz scouting →')));
 }
 
 function section(title, ...nodes) {
@@ -375,7 +375,18 @@ function styleSection(splits) {
         axisPicker((axis, value) => { state[axis] = value; render(); })),
       styleMap(points, { highlight: meta.club.key, xLabel: x.label, yLabel: y.label }),
       el('div', { class: 'legend' },
-        el('span', { class: 'muted' }, 'kolor punktu = bilans na 100 posiadań · przerywane linie = średnia ligi'))));
+        el('span', { class: 'legend__item' },
+          el('span', { class: 'legend__dot', style: `background:${netColor(10)}` }),
+          'dodatni bilans'),
+        el('span', { class: 'legend__item' },
+          el('span', { class: 'legend__dot', style: `background:${netColor(-10)}` }),
+          'ujemny bilans'),
+        el('span', { class: 'legend__item' },
+          el('span', { class: 'legend__dot legend__dot--club' }),
+          'nasz zespół'),
+        el('span', { class: 'legend__item' },
+          'kolor = bilans na 100 posiadań (pełna siła przy ±15), niezależnie od osi'),
+        el('span', { class: 'legend__item' }, 'przerywane linie = średnia ligi'))));
 }
 
 /** Dwa selecty wybierajace wskazniki na osie mapy stylu. */
