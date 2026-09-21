@@ -256,6 +256,7 @@ const NAV = [
 
 export async function mountChrome(active) {
   const meta = await load('meta');
+  teamLogos = new Map((meta.teams || []).map((t) => [t.key, t.logo]));
   const bar = document.querySelector('[data-nav]');
   if (bar) {
     bar.innerHTML = `
@@ -334,11 +335,25 @@ export function initials(name) {
   return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
 }
 
+/**
+ * Herby druzyn spod `meta`, zeby portret mogl sie podpisac bez dodatkowego
+ * przekazywania danych przez kazda strone. Wypelniane przez `mountChrome`.
+ */
+let teamLogos = new Map();
+
+export const teamLogo = (key) => teamLogos.get(key) || '';
+
 /** Prostokatny portret zawodnika - na kartach i w naglowku profilu. */
 export function portrait(player, extra = '') {
   const frame = el('span', { class: ('portrait ' + extra).trim(), title: player?.name || '' });
   if (player?.photo) {
     frame.append(el('img', { src: player.photo, alt: player.name || '', loading: 'lazy' }));
+  } else {
+    frame.append(el('i', { class: 'avatar__initials' }, initials(player?.name)));
+  }
+  const logo = teamLogo(player?.team);
+  if (logo) {
+    frame.append(el('img', { class: 'portrait__logo', src: logo, alt: '', loading: 'lazy' }));
   }
   return frame;
 }
