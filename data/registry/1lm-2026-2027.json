@@ -80,6 +80,23 @@
       "away_score": 94,
       "finished": true,
       "fiba_id": 2906447
+    },
+    {
+      "pzkosz_id": "223887",
+      "round": 1,
+      "date": "2026-09-21",
+      "tipoff": "2026-09-21T19:00:00+02:00",
+      "venue": "OSiR Wola Koło",
+      "city": "Warszawa",
+      "home": "KKS Polonia Warszawa",
+      "away": "Solvera Sokół Łańcut",
+      "home_score": 95,
+      "away_score": 93,
+      "finished": true,
+      "url": "https://1lm.pzkosz.pl/mecz/223887/kks-polonia-warszawa---solvera-sokol-lancut.html",
+      "fiba_id": 2908710,
+      "fiba_home": "KKS Polonia Warszawa",
+      "fiba_away": "Solvera Sokół Łańcut"
     }
   ],
   "checked": [
